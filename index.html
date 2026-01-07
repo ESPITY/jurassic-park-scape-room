@@ -1,0 +1,93 @@
+<!-- Jurassic Park - Lucia Garcia Bobillo -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jurassic Park</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- WebSockets API -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.slim.js"></script>
+</head>
+<body>
+    <!-- CONTENEDOR PRINCIPAL DEL JUEGO -->
+    <div class="game-container">
+        <!-- CABECERA: sector, estatus del Jeep, retos completados y temporizador -->
+        <div class="game-header">
+            <div id="header-name" class="header-info">JURASSIC PARK CONTROL</div>
+            <div id="header-sector" class="header-info">Sector 1 - Museo</div>
+            <div id="header-timer" class="header-info">60:00</div>
+
+        </div>
+
+        <!-- ÁREA VISUAL (izq): mapa, sistemas (electricidad, seguridad y puente) y documentos  -->
+        <div id="game-screen">
+            <!-- COMUNICACIONES: con el Jeep y el helicóptero -->
+            <div id="visual-comms" class="visual-content active">
+                <!-- <div id="visual-chat">
+                     Mensajes cargados dinámicamente -> MAPA
+                </div> -->
+            </div>
+
+            <!-- SISTEMAS: electricidad (reestablecer energía), seguridad (cercas eléctricas) y puente -->
+            <!-- SISTEMA DE ELECTRICIDAD: reestablecer energía -->
+            <div id="visual-systems" class="visual-content">
+                <div id="visual-electricity" class="visual-content">
+
+                </div>
+
+                <!-- SISTEMA DE SEGURIDAD: mapa de las cercas -->
+                <div id="visual-security" class="visual-content">
+
+                </div>
+                
+                <!-- PUENTE: cámara de vidiglancia -->
+                <div id="visual-bridge" class="visual-content">
+
+                </div>
+            </div>
+            
+            <!-- DOCUMENTOS: manuales, correos, protocolos, instrucciones... -->
+            <div id="visual-docs" class="visual-content">         
+                <div class="docs-content" id="docs-content">
+                    <!-- Contenido de documentos cargado dinámicamente -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- ÁREA INTERACTIVA (der): controles de comunicación, sistemas y documentos -->
+        <div id="game-controls">
+            <!-- PESTAÑAS -->
+            <div class="tabs">
+                <div class="tab active" data-tab="comms">COMUNICACIONES</div>
+                <div class="tab" data-tab="system">SISTEMAS</div>
+                <div class="tab" data-tab="docs">DOCUMENTOS</div>
+            </div>
+            
+            <!-- CONTENIDO DE PESTAÑAS -->
+            <div id="tab-content" class="tab-content">
+                <!-- Se carga dinámicamente según la pestaña -->
+            </div>
+        </div>
+
+
+    </div>
+
+    <script>
+        <!-- Establecer conexión -->
+        var socket = io(SERVER_URL, {query: {
+            "escapeRoom": ESCAPE_ROOM_ID,
+            "email": STUDENT_EMAIL,
+            "token": STUDENT_TOKEN,
+            // Optional (if you don't have the token)
+            "password": STUDENT_PASSWORD
+        }});
+
+    </script>
+
+    <!-- <script type="module" src="main.js"></script> -->
+    <script src="main.js"></script>
+</body>
+</html>

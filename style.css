@@ -1,0 +1,498 @@
+* {
+    box-sizing: border-box;
+    background-color: #c0c0c0;
+    margin: 0;
+    padding: 0;
+}
+
+p, h1, h2, h3, h4, h5, h6, span, i, strong {
+    background-color: inherit;
+}
+
+/* CONTENEDOR PRINCIPAL DEL JUEGO */
+.game-container {
+    position: fixed;
+    inset: 20px;
+    display: grid;
+    grid-template-columns: 50% 50%; /* área visual (izq) / área interactiva (der) */
+    grid-template-rows: 8% 92%; /* game-header / game-container */
+    padding:20px;
+
+    background-color: #c0c0c0;
+    color: black;
+    font-family: 'Courier New', monospace;
+    font-size: 1.5em;
+
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+/* CONTENEDOR DE LA CABECERA */
+.game-header {
+    grid-column: 1 / span 2;
+    grid-row: 1;
+    gap: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    /* padding: 0 20px; */
+    background-color: white;
+    font-weight: 800;
+    margin-bottom: 20px;
+
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+
+/* INDICADORES CABECERA */
+.header-info {
+    position: relative;
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+}
+
+/* INDICADORES CABECERA: líneas verticales separadoras */
+.header-info:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -15px;
+    top: 0;
+    bottom: 0;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+/* INDICADORES CABECERA: nombre del programa */
+#header-name {
+    color: #333333;
+    letter-spacing: 2px;
+    background-color: #c0c0c0;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+/* INDICADORES CABECERA: temporizador */
+#header-timer {
+    color: red;
+}
+
+/* ÁREA VISUAL (izq) */
+#game-screen {
+    grid-column: 1;
+    grid-row: 2;
+    position: relative;
+    overflow: hidden;
+    margin-right:10px;
+
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+
+/* CONTENIDO DEL ÁREA VISUAL (izq): oculto */
+.visual-content {
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+
+/* CONTENIDO DEL ÁREA VISUAL (izq): visible */
+.visual-content.active {
+    display: block;
+}
+
+/* ÁREA INTERACTIVA (der) */
+#game-controls {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    margin-left:10px;
+
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+
+/* CONTENEDOR DE LAS PESTAÑAS */
+.tabs {
+    display: flex;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+/* PESTAÑA: oculta */
+.tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    background-color: #c0c0c0;
+
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+.tab:hover {
+    color: black;
+    background-color: #dddbdb;
+}
+
+
+/* PESTAÑA: visible */
+.tab.active {
+    background-color: #c0c0c0;
+
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+
+/* CONTENIDO DE LA PESTAÑA */
+.tab-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #494c4f;
+}
+
+/* CONTENEDOR DEL ÁREA VISUAL DE LOS DOCUMENTOS (izq)*/
+#visual-docs {
+    background-color: white;
+}
+
+/* CONTENEDOR DEL ÁREA VISUAL DE LOS DOCUMENTOS (izq)*/
+.docs-content {
+    height: 100%;
+    width: 100%;
+    padding: 20px;
+    background-color: white;
+}
+
+/* DOCUMENTO DE LA LISTA: asignada dinámicamente  */
+.document {
+    /* background-color: black;
+    color: white;
+    padding: 15px; */
+    /* margin: 10px 0; */
+    /* inset: 100px; */
+    /* border-left: 3px solid #444; */
+    /* border: 4px dashed white;
+    cursor: pointer; */
+
+    padding: 20px;
+    cursor: pointer;
+    color: #333333;
+    background-color: #c0c0c0;
+
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+.document:hover {
+    color: black;
+    background-color: #dddbdb;
+}
+
+.document.active {
+    background-color: #c0c0c0;
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+
+.document-read {
+    color: rgb(0, 159, 0);
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+/* LISTA DE TAREAS*/
+.challenges-list {
+    background-color: white;
+}
+
+/* CHECKBOX: tarea */
+.checkbox {
+    font-weight: 900;
+}
+
+.docs-visual-default {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    width: 100%;
+    gap: 40px; 
+    background-color: inherit;
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
+
+.jurassic-park-logo-docs {
+    background-color: inherit;
+}
+
+/* RETO 1: contenedor del panel del acceso a los sistemas */
+.system-code-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    width: 100%;
+    gap: 40px; 
+    background-color: inherit;
+}
+
+.system-code-container h3, .system-code-container p { color: white; }
+
+
+/* RETO 1: código del acceso a los sistemas */
+.system-code {
+    background-color: #c0c0c0;
+    font-size: 2rem;
+    letter-spacing: 6px;
+    text-align: center;
+    padding: 20px;
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+
+.system-code.incorrect { background-color: #bb6868; }
+.system-code.correct { background-color: #75ba67; }
+
+/* RETO 1: grid de los botones del panel del acceso a los sistemas */
+.system-code-btn-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    background-color: #494c4f;
+}
+
+/* RETO 1: botones del panel del acceso a los sistemas */
+.system-code-btn {
+    padding: 18px 10px;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 20px;
+    min-width: 150px;
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    transition: all 0.2s;
+    color: #2e2e2e;
+    background-color: #c0c0c0;
+
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+.system-code-btn:hover {
+    color: black;
+    background-color: #dddbdb;
+}
+
+.system-code-btn:active {
+    color: #2e2e2e;
+    background-color: #c0c0c0;
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+
+
+
+
+
+
+
+/* -----------------*/
+
+
+#visual-comms {
+    background: #263f89;
+}
+
+#visual-systems {
+    background: rgb(0, 0, 0);
+}
+
+#visual-electricity {
+    background: rgb(255, 45, 3);
+}
+
+#visual-bridge {
+    background: rgb(255, 45, 3);
+}
+
+#visual-jeep {
+    background: rgb(255, 45, 3);
+}
+
+
+.aa {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+}
+
+
+
+
+/* -----------------*/
+
+/* PANEL DE CÓDIGO */
+.code-editor {
+    width: 100%;
+    height: 200px;
+    background: #000;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    border: 1px solid #333;
+    padding: 10px;
+    resize: vertical;
+}
+
+
+
+/* INDICADORES DE PROGRESO EN EL MAPA */
+.progress-indicator {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    z-index: 100;
+}
+
+.solved { background: #0f0; }
+.in-progress { background: #ff0; animation: pulse 2s infinite; }
+.locked { background: #f00; }
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* SCROLLBAR: https://gist.github.com/Dakedres/0ccda599648833a1c2f65d3967aa131b */
+body *::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+  background: none;
+}
+
+body *::-webkit-scrollbar-thumb, body *::-webkit-scrollbar-button {
+  width: 16px;
+  height: 16px;
+  background: silver;
+  box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px gray;
+  border: 1px solid;
+  border-color: silver #000 #000 silver;
+}
+
+body *::-webkit-scrollbar-track {
+  image-rendering: optimizeSpeed;
+  image-rendering: pixelated;
+  image-rendering: optimize-contrast;
+  background-image: url("images/scrollbar-track-background.svg");
+  background-position: 0 0;
+  background-repeat: repeat;
+  background-size: 8px;
+}
+
+body *::-webkit-scrollbar-button {
+  background-repeat: no-repeat;
+  background-size: 16px;
+}
+
+body *::-webkit-scrollbar-button:single-button:vertical:decrement {
+  background-image: url("images/arrow-up.svg");
+}
+
+body *::-webkit-scrollbar-button:single-button:vertical:increment {
+  background-image: url("images/arrow-down.svg");
+}
+
+body *::-webkit-scrollbar-button:single-button:horizontal:decrement {
+  background-image: url("images/arrow-left.svg");
+}
+
+body *::-webkit-scrollbar-button:single-button:horizontal:increment {
+  background-image: url("images/arrow-right.svg");
+}
+
+body *::-webkit-scrollbar-corner {
+  background: silver;
+}
+
+
+
