@@ -103,14 +103,15 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong {
 }
 
 /* CONTENIDO DEL ÁREA VISUAL (izq): oculto */
-.visual-content {
+.visual-content, .system-visual {
     width: 100%;
     height: 100%;
     display: none;
+    background-color: black;
 }
 
 /* CONTENIDO DEL ÁREA VISUAL (izq): visible */
-.visual-content.active {
+.visual-content.active, .system-visual.active {
     display: block;
 }
 
@@ -255,6 +256,14 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong {
 
 .jurassic-park-logo-docs {
     background-color: inherit;
+}
+
+/* IMAGEN VISUAL DE LOS SISTEMAS*/
+.system-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: transparent;
 }
 
 /* RETO 1: contenedor del panel del acceso a los sistemas */

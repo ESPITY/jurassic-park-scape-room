@@ -99,13 +99,13 @@ const tabContents = {
     systemUnlocked: `
         <h3 class="systems-title">Sistemas de Jurassic Park</h3>
         <div class="systems-btns">
-            <button id="system-electricity-btn" class="system-btn" onclick="openSystem('electricity')">
+            <button id="system-electricity-btn" class="system-btn" onclick="openSystem('systemElectricity')">
                 <span class="system-btn-label">Electricidad</span>
             </button>
-            <button id="system-security-btn" class="system-btn" onclick="openSystem('security')">
+            <button id="system-security-btn" class="system-btn" onclick="openSystem('systemSecurity')">
                 <span class="system-btn-label">Seguridad</span>
             </button>
-            <button id="system-bridge-btn" class="system-btn" onclick="openSystem('bridge')">
+            <button id="system-bridge-btn" class="system-btn" onclick="openSystem('systemBridge')">
                 <span class="system-btn-label">Puente</span>
             </button>
         </div>
@@ -224,7 +224,7 @@ function changeVisuals(tabId) {
             break;
         case 'system':
             document.getElementById('visual-systems').classList.add('active');
-            showSystemsDefaultVisual();
+            showSystemVisual('systemDefault');
             break;
         case 'docs':
             document.getElementById('visual-docs').classList.add('active');
@@ -235,14 +235,59 @@ function changeVisuals(tabId) {
     }
 }
 
-// SISTEMAS: carga el área visual por defecto de los sistemas
-function showSystemsDefaultVisual() {
-    const docsContent = document.getElementById('visual-systems');
-    docsContent.innerHTML = `
-        <div class="aa">
-            <img src="images/jurassic-park-systems.png" alt="Jurassic Park Logo">
-        </div>
-    `;
+// SISTEMAS: carga los visuales de cada sistema (delay intencional)
+function showSystemVisual(system) {
+    const applySystem = () => {
+        document.querySelectorAll('.system-visual').forEach(v => v.classList.remove('active'));
+        
+        switch(system) {
+            case 'systemDefault':
+                document.getElementById('visual-system-default').classList.add('active');
+                break;
+            case 'systemElectricity':
+                document.getElementById('visual-system-electricity').classList.add('active');
+                updateElectricityVisual();
+                break;
+            case 'systemSecurity':
+                document.getElementById('visual-system-security').classList.add('active');
+                updateSecurityVisual();
+                break;
+            case 'systemBridge':
+                document.getElementById('visual-system-bridge').classList.add('active');
+                updateBridgeVisual();
+                break;
+        }
+    };
+
+    if (system === 'systemDefault') applySystem();
+    else setTimeout(applySystem, 500);
+}
+
+function updateElectricityVisual() {
+    const electricityImg = document.querySelector('#visual-system-electricity img');
+    if (gameState.challenges.electricity.completed) {
+        electricityImg.src = 'images/electricity-visual-completed.png';
+    } else {
+        electricityImg.src = 'images/electricity-visual-incomplete.png';
+    }
+}
+
+function updateSecurityVisual() {
+    const securityImg = document.querySelector('#visual-system-security img');
+    if (gameState.challenges.fences.completed) {
+        securityImg.src = 'images/security-visual-completed.png';
+    } else {
+        securityImg.src = 'images/security-visual-incomplete.png';
+    }
+}
+
+function updateBridgeVisual() {
+    const bridgeImg = document.querySelector('#visual-system-bridge img');
+    if (gameState.challenges.bridge.completed) {
+        bridgeImg.src = 'images/bridge-down.png';
+    } else {
+        bridgeImg.src = 'images/bridge-up.png';
+    }
 }
 
 // DOCUMENTOS: carga el área visual por defecto de los documentos
@@ -393,21 +438,23 @@ function systemCodeCheck() {
 }
 
 
-// NAVEGACIÓN ENTRE SISTEMAS: abrir sistemas (cursor de wait)
+// NAVEGACIÓN ENTRE SISTEMAS: abrir sistemas (delay intencional)
 function openSystem(systemId) {
     const all = document.querySelectorAll('*');
     all.forEach(el => el.style.cursor = 'wait');
     
     setTimeout(() => {
-        document.getElementById('tab-content').innerHTML = tabContents['system' + systemId.charAt(0).toUpperCase() + systemId.slice(1)];
+        document.getElementById('tab-content').innerHTML = tabContents[systemId];
         all.forEach(el => el.style.cursor = '');
     }, 500);
+
+    showSystemVisual(systemId);
 }
 
 // NAVEGACIÓN ENTRE SISTEMAS: volver al selector de sistemas
 function backToSystem() {
     document.getElementById('tab-content').innerHTML = tabContents.systemUnlocked;
-    //showSystemVisual('default');
+    showSystemVisual('systemDefault');
 }
 
 // RETO 3: reavtivar las cercas eléctricas
