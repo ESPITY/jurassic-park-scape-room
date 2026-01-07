@@ -73,7 +73,7 @@ const tabContents = {
         </div>
     `,
     
-    system: `
+    systemBlocked: `
         <div class="system-code-container">
             <h3>Acceso a los Sistemas de Jurassic Park</h3>
             <p>Introduzca la contraseña:</p>
@@ -97,10 +97,21 @@ const tabContents = {
     `,
 
     systemUnlocked: `
-
+        <h3 class="systems-title">Sistemas de Jurassic Park</h3>
+        <div class="systems-btns">
+            <button class="system-btn" id="system-electricity-btn" onclick="systemCodeAddDigit(1)">
+                <span class="system-btn-label">Electricidad</span>
+            </button>
+            <button class="system-btn" id="system-security-btn" onclick="systemCodeAddDigit(1)">
+                <span class="system-btn-label">Seguridad</span>
+            </button>
+            <button class="system-btn" id="system-bridge-btn" onclick="systemCodeAddDigit(1)">
+                <span class="system-btn-label">Puente</span>
+            </button>
+        </div>
     `,
     
-    systemElectric: `
+    systemElectricity: `
 
     `,
     
@@ -155,11 +166,23 @@ function changeTab(tabId) {
     event.target.classList.add('active');
     
     document.getElementById('tab-content').innerHTML = tabContents[tabId];
+
+    // Si no se ha superado el reto 1 (access) se muestra el panel (bloqueado), de lo contrario los botones del sistema (desbloqueado)
+    if (tabId === 'system') {
+        if (!gameState.challenges.access.completed) {
+            document.getElementById('tab-content').innerHTML = tabContents.systemBlocked;
+            systemCodeUpdateDisplay();  // Si hay código escrito al volver a la pestaña se muestra
+        } else {
+            document.getElementById('tab-content').innerHTML = tabContents.systemUnlocked;      
+        }
+    } else {
+        // Para otras pestañas, cargar contenido normal
+        document.getElementById('tab-content').innerHTML = tabContents[tabId];
+    }
     
     changeVisuals(tabId);
-    
+
     if (tabId === 'docs') loadDocumentList();   // Si es la pestaña documentos, carga la lista
-    if (tabId === 'system') systemCodeUpdateDisplay();    // Si hay código escrito al volver a la pestaña se muestra
 }
 
 // ÁREA VISUAL: cambia a los visuales (izq) de la pestaña recibida

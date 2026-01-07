@@ -342,6 +342,78 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong {
     cursor: not-allowed;    
 }
 
+/* SISTEMAS: pantalla para acceder a cada sistemas*/
+.systems-title {
+    text-align: center;
+    color: white;
+}
+
+.systems-btns {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-top: 40px;
+    width: 100%;
+    gap: 20px; 
+    background-color: inherit;
+}
+
+.system-btn {
+    position: relative;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 20px;
+    min-width: 180px;
+    min-height: 180px;
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    transition: all 0.2s;
+    color: #2e2e2e;
+    overflow: hidden;
+    vertical-align: bottom;
+    background-color: #494c4f;
+    border: none;
+}
+
+.system-btn-label {
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: white;
+    background-color: transparent;
+    padding: 2px 4px;
+    z-index: 2;
+    pointer-events: none;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8em;
+}
+
+#system-electricity-btn, #system-security-btn, #system-bridge-btn {
+    background-position: center 20px;
+    background-size: 80% auto;
+    background-repeat: no-repeat;
+}
+
+#system-electricity-btn { background-image: url("images/system-electricity-default.png"); }
+#system-electricity-btn:hover { background-image: url("images/system-electricity-hover.png"); }
+#system-electricity-btn:disabled { background-image: url("images/system-electricity-disabled.png"); }
+#system-electricity-btn:active { border: 1px dashed #c0c0c0; }
+
+#system-security-btn { background-image: url("images/system-security-default.png"); }
+#system-security-btn:hover { background-image: url("images/system-electricity-hover.png"); }
+#system-security-btn:disabled { background-image: url("images/system-security-disabled.png"); }
+#system-security-btn:active { border: 1px dashed #c0c0c0; }
+
+#system-bridge-btn { background-image: url("images/system-bridge-default.png"); }
+#system-bridge-btn:hover { background-image: url("images/system-bridge-hover.png"); }
+#system-bridgey-btn:disabled { background-image: url("images/system-bridge-disabled.png"); }
+#system-bridge-btn:active { border: 1px dashed #c0c0c0; }
+
 
 
 
