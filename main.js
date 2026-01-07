@@ -3,7 +3,7 @@ const gameState = {
     challenges: {
         access: { status: 'active', completed: false, solution: {code: "1016"}, answer: {code: ''}},
         electricity: { status: 'locked', completed: false, solution: {} },
-        fences: { status: 'locked', completed: false, solution: {} },
+        security: { status: 'locked', completed: false, solution: {code: "1111"} },
         bridge: { status: 'locked', completed: false, solution: {} },
         helicopter: { status: 'locked', completed: false, solution: {} }
     },
@@ -14,7 +14,7 @@ const gameState = {
                 <div class="challenges-list">
                     <p><span id="access" class="checkbox">☐</span> Acceder a los sistemas</p>
                     <p><span id="electricity" class="checkbox">☐</span> Restablecer la electricidad</p>
-                    <p><span id="fences" class="checkbox">☐</span> Reactivar las cercas eléctricas</p>
+                    <p><span id="security" class="checkbox">☐</span> Reactivar las cercas eléctricas</p>
                     <p><span id="bridge" class="checkbox">☐</span> Bajar el puente</p>
                     <p><span id="helicopter" class="checkbox">☐</span> Llamar al helicóptero</p>
                 </div>
@@ -78,7 +78,7 @@ const tabContents = {
             <h3>Acceso a los Sistemas de Jurassic Park</h3>
             <p>Introduzca la contraseña:</p>
             
-            <div class="system-code" id="system-code">____</div>
+            <div id="system-code" class="system-code">____</div>
             <div class="system-code-btn-grid">
                 <button class="system-code-btn" onclick="systemCodeAddDigit(1)">1</button>
                 <button class="system-code-btn" onclick="systemCodeAddDigit(2)">2</button>
@@ -99,13 +99,13 @@ const tabContents = {
     systemUnlocked: `
         <h3 class="systems-title">Sistemas de Jurassic Park</h3>
         <div class="systems-btns">
-            <button class="system-btn" id="system-electricity-btn" onclick="systemCodeAddDigit(1)">
+            <button id="system-electricity-btn" class="system-btn" onclick="openSystem('electricity')">
                 <span class="system-btn-label">Electricidad</span>
             </button>
-            <button class="system-btn" id="system-security-btn" onclick="systemCodeAddDigit(1)">
+            <button id="system-security-btn" class="system-btn" onclick="openSystem('security')">
                 <span class="system-btn-label">Seguridad</span>
             </button>
-            <button class="system-btn" id="system-bridge-btn" onclick="systemCodeAddDigit(1)">
+            <button id="system-bridge-btn" class="system-btn" onclick="openSystem('bridge')">
                 <span class="system-btn-label">Puente</span>
             </button>
         </div>
@@ -116,7 +116,36 @@ const tabContents = {
     `,
     
     systemSecurity: `
-
+        <div class="system-slider-container">
+            <h3>Sistema de seguridad - Cercas Eléctricas</h3>
+            <p>Ajustes de cada sector:</p>
+           
+            <div class="slider-sectors">
+                    <label>A</label>
+                    <label>B</label>
+                    <label>C</label>
+                    <label>D</label>
+            </div>     
+            <div class="slidergrid">
+                <div class="slider-labels">
+                    <label>30 kV --</label
+                    <label>25 kV --</label>
+                    <label>20 kV --</label>
+                    <label>15 kV --</label>
+                    <label>10 kV --</label>
+                    <label>05 kV --</label>
+                    <label>00 kV --</label>
+                </div>     
+                <div class="slider-container"><input class="slider" type="range" min="1" max="7" step="1" value="0"></div>
+                <div class="slider-container"><input class="slider" type="range" min="1" max="7" step="1" value="0"></div>
+                <div class="slider-container"><input class="slider" type="range" min="1" max="7" step="1" value="0"></div>
+                <div class="slider-container"><input class="slider" type="range" min="1" max="7" step="1" value="0"></div>
+            </div>
+            <div>
+                <button class="system-code-btn" onclick="backToSystem()">↲ ATRÁS</button>
+                <button id="system-security-check-btn" class="system-code-btn" onclick="systemSecurityCheck()">⏻ ACTIVAR</button>
+            </div>
+        </div>
     `,
 
     systemBridge: `
@@ -345,14 +374,63 @@ function systemCodeCheck() {
     if (gameState.challenges.access.answer.code === gameState.challenges.access.solution.code) {
         systemCode.classList.add('correct');
         gameState.challenges.access.completed = true;
-        // disable buttons
+        gameState.documents.find(d => d.id === 4).show = true;
+        gameState.documents.find(d => d.id === 5).show = true;
+
+        // Desactivar los botones
         const buttons = document.querySelectorAll('.system-code-btn');
         buttons.forEach(btn => { btn.disabled = true; });
+
         //challengeCompleted
+        // Actualiza la pestaña system despues de X tiempo
+        setTimeout(() => { document.getElementById('tab-content').innerHTML = tabContents.systemUnlocked; }, 500);
     } else {
         systemCode.classList.add('incorrect');
     }
     
-    updateProgress();
-    checkGameComplete();
+    //updateProgress();
+    //checkGameComplete();
+}
+
+
+// NAVEGACIÓN ENTRE SISTEMAS: abrir sistemas (cursor de wait)
+function openSystem(systemId) {
+    const all = document.querySelectorAll('*');
+    all.forEach(el => el.style.cursor = 'wait');
+    
+    setTimeout(() => {
+        document.getElementById('tab-content').innerHTML = tabContents['system' + systemId.charAt(0).toUpperCase() + systemId.slice(1)];
+        all.forEach(el => el.style.cursor = '');
+    }, 500);
+}
+
+// NAVEGACIÓN ENTRE SISTEMAS: volver al selector de sistemas
+function backToSystem() {
+    document.getElementById('tab-content').innerHTML = tabContents.systemUnlocked;
+    //showSystemVisual('default');
+}
+
+// RETO 3: reavtivar las cercas eléctricas
+function systemSecurityCheck() {
+    const sliders = document.querySelectorAll('.slider');
+    let answer = "";
+
+    sliders.forEach(slider => { answer += slider.value; });
+
+    checkButton = document.getElementById('system-security-check-btn');
+
+    if (answer === gameState.challenges.security.solution.code) {
+        gameState.challenges.security.completed = true;
+
+        // Desactivar los botones
+        const sliders = document.querySelectorAll('.slider');
+        sliders.forEach(sld => { sld.disabled = true; });
+
+        checkButton.disabled = true;
+        checkButton.classList.add('correct');
+
+    } else {
+        checkButton.classList.add('incorrect');
+        setTimeout(() => { checkButton.classList.remove('incorrect'); }, 500);
+    }
 }

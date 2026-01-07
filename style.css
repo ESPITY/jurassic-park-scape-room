@@ -376,6 +376,7 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong {
     vertical-align: bottom;
     background-color: #494c4f;
     border: none;
+    font-size: 1.1em;
 }
 
 .system-btn-label {
@@ -405,7 +406,7 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong {
 #system-electricity-btn:active { border: 1px dashed #c0c0c0; }
 
 #system-security-btn { background-image: url("images/system-security-default.png"); }
-#system-security-btn:hover { background-image: url("images/system-electricity-hover.png"); }
+#system-security-btn:hover { background-image: url("images/system-security-hover.png"); }
 #system-security-btn:disabled { background-image: url("images/system-security-disabled.png"); }
 #system-security-btn:active { border: 1px dashed #c0c0c0; }
 
@@ -416,6 +417,145 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong {
 
 
 
+
+
+
+
+
+
+
+
+
+/* RETO 3: contenedor del panel de seguridad */
+.system-slider-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    width: 100%;
+    gap: 40px; 
+    background-color: inherit;
+    background-color: #c0c0c0;
+    
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+.slider-sectors {
+    display: flex;
+    justify-content: center;
+    gap: 60px; /* Mismo gap que slidergrid */
+    padding-left: 170px;
+    overflow-x: hidden;
+}
+
+.slider-sectors label {
+    width: 30px; /* Mismo ancho que los slider-container */
+    text-align: center;
+}
+
+.slidergrid {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    gap: 60px; 
+    background-color: inherit;
+    height: 300px;
+}
+
+.slider-labels {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    align-items: center;
+    padding: 5px 0px;
+}
+
+.slider-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 30px;
+    background-color: transparent;
+    position: relative;
+}
+
+.slider {
+    position: absolute; 
+    width: 300px;
+    height: 14px;
+    top: 50%;
+    left: 50%;
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: black;
+    border-radius: 2px;
+    border: 6px solid;
+    border-color: #808080 #808080 #dfdfdf #dfdfdf;
+    cursor: pointer;
+    transform: translate(-50%, -50%) rotate(270deg);
+    transform-origin: center;
+}
+
+.slider:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;    
+}
+
+.slider::-moz-range-thumb {
+    width: 16px;
+    height: 30px;
+    background: #c0c0c0;
+    cursor: pointer;
+
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #dfdfdf #808080 #808080;
+    box-shadow: -1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+.slider::-moz-range-thumb:active:not(:disabled)  {
+    background: #c0c0c0 !important;
+    border-color: #808080 #808080 #dfdfdf #dfdfdf;
+}
+
+.slider::-moz-range-thumb:hover:not(:disabled)  { background-color: #dddbdb; }
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px;
+    height: 38px;
+    background: #c0c0c0;
+    cursor: pointer;
+
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #dfdfdf #808080 #808080;
+    box-shadow: -1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+.slider::-webkit-slider-thumb:active:not(:disabled)  {
+    background: #c0c0c0 !important;
+    border-color: #808080 #808080 #dfdfdf #dfdfdf;
+}
+
+.slider::-webkit-slider-thumb:hover:not(:disabled)  { background-color: #dddbdb; }
+
+#system-security-check-btn { transition: all 0.2s; }
+#system-security-check-btn.incorrect { background-color: #bb6868; }
+#system-security-check-btn.correct { background-color: #75ba67; }
 
 
 
@@ -569,6 +709,3 @@ body *::-webkit-scrollbar-button:single-button:horizontal:increment {
 body *::-webkit-scrollbar-corner {
   background: silver;
 }
-
-
-
