@@ -80,18 +80,18 @@ const tabContents = {
             
             <div class="system-code" id="system-code">____</div>
             <div class="system-code-btn-grid">
-                <button class="system-code-btn" onclick="addDigit(1)">1</button>
-                <button class="system-code-btn" onclick="addDigit(2)">2</button>
-                <button class="system-code-btn" onclick="addDigit(3)">3</button>
-                <button class="system-code-btn" onclick="addDigit(4)">4</button>
-                <button class="system-code-btn" onclick="addDigit(5)">5</button>
-                <button class="system-code-btn" onclick="addDigit(6)">6</button>
-                <button class="system-code-btn" onclick="addDigit(7)">7</button>
-                <button class="system-code-btn" onclick="addDigit(8)">8</button>
-                <button class="system-code-btn" onclick="addDigit(9)">9</button>
-                <button class="system-code-btn" onclick="clearCode()">CLEAR</button>
-                <button class="system-code-btn" onclick="addDigit(0)">0</button>
-                <button class="system-code-btn" onclick="checkSecurityCode()">ENTER</button>
+                <button class="system-code-btn" onclick="systemCodeAddDigit(1)">1</button>
+                <button class="system-code-btn" onclick="systemCodeAddDigit(2)">2</button>
+                <button class="system-code-btn" onclick="systemCodeAddDigit(3)">3</button>
+                <button class="system-code-btn" onclick="systemCodeAddDigit(4)">4</button>
+                <button class="system-code-btn" onclick="systemCodeAddDigit(5)">5</button>
+                <button class="system-code-btn" onclick="systemCodeAddDigit(6)">6</button>
+                <button class="system-code-btn" onclick="systemCodeAddDigit(7)">7</button>
+                <button class="system-code-btn" onclick="systemCodeAddDigit(8)">8</button>
+                <button class="system-code-btn" onclick="systemCodeAddDigit(9)">9</button>
+                <button class="system-code-btn" onclick="systemCodeClear()">CLEAR</button>
+                <button class="system-code-btn" onclick="systemCodeAddDigit(0)">0</button>
+                <button class="system-code-btn" onclick="systemCodeCheck()">ENTER</button>
             </div>
         </div>
     `,
@@ -159,7 +159,7 @@ function changeTab(tabId) {
     changeVisuals(tabId);
     
     if (tabId === 'docs') loadDocumentList();   // Si es la pestaña documentos, carga la lista
-    if (tabId === 'system') updateCodeDisplay();    // Si hay código escrito al volver a la pestaña se muestra
+    if (tabId === 'system') systemCodeUpdateDisplay();    // Si hay código escrito al volver a la pestaña se muestra
 }
 
 // ÁREA VISUAL: cambia a los visuales (izq) de la pestaña recibida
@@ -288,31 +288,43 @@ function challengeCompleted(challengeId) {
 }
 
 // RETO 1: acceso a los sistemas
-function addDigit(digit) {
-    const systemCode = document.getElementById('system-code');
-    systemCode.classList.remove('correct');
-    systemCode.classList.remove('incorrect');
+function systemCodeAddDigit(digit) {
+    systemCodeClearDisplayColor();
+
     if (gameState.challenges.access.answer.code.length < 4) {
         gameState.challenges.access.answer.code += digit;
-        updateCodeDisplay();
+        systemCodeUpdateDisplay();
     }
 }
 
-function clearCode() {
+// RETO 1: acceso a los sistemas
+function systemCodeClear() {
+    systemCodeClearDisplayColor();
     gameState.challenges.access.answer.code = '';
-    updateCodeDisplay();
+    systemCodeUpdateDisplay();
 }
 
-function updateCodeDisplay() {
+// RETO 1: acceso a los sistemas
+function systemCodeUpdateDisplay() {
     const display = document.getElementById('system-code');
     display.textContent = gameState.challenges.access.answer.code.padEnd(4, '_');
 }
 
-function checkSecurityCode() {
+function systemCodeClearDisplayColor() {
+    const systemCode = document.getElementById('system-code');
+    systemCode.classList.remove('correct');
+    systemCode.classList.remove('incorrect');
+}
+
+// RETO 1: acceso a los sistemas
+function systemCodeCheck() {
     const systemCode = document.getElementById('system-code');
     if (gameState.challenges.access.answer.code === gameState.challenges.access.solution.code) {
         systemCode.classList.add('correct');
         gameState.challenges.access.completed = true;
+        // disable buttons
+        const buttons = document.querySelectorAll('.system-code-btn');
+        buttons.forEach(btn => { btn.disabled = true; });
         //challengeCompleted
     } else {
         systemCode.classList.add('incorrect');

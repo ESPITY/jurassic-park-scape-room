@@ -323,12 +323,12 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong {
     box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
 }
 
-.system-code-btn:hover {
+.system-code-btn:hover:not(:disabled) {
     color: black;
     background-color: #dddbdb;
 }
 
-.system-code-btn:active {
+.system-code-btn:active:not(:disabled) {
     color: #2e2e2e;
     background-color: #c0c0c0;
     border-radius: 2px;
@@ -337,6 +337,10 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong {
     border-color: #808080 #dfdfdf #dfdfdf #808080;
 }
 
+.system-code-btn:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;    
+}
 
 
 
