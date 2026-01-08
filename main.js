@@ -39,7 +39,7 @@ const gameState = {
                         <li><b>Longitud:</b> 13m</li>
                         <li><b>Peso:</b> 9t</li>
                         <li><b>Alimentación:</b> carnívoro</li>
-                        <li><b>Cerca:</b> 20 kV</li>
+                        <li><b>Cerca, voltaje de seguridad:</b> 20 kV</li>
                     </ul>
                     <img src="images/tyrannosaurus-rex.jpg" alt="Tyrannosaurus Rex">
                     <br><br>
@@ -52,7 +52,7 @@ const gameState = {
                         <li><b>Longitud:</b> 1,8m</li>
                         <li><b>Peso:</b> 15kg</li>
                         <li><b>Alimentación:</b> carnívoro</li>
-                        <li><b>Cerca: </b> 5 kV</li>
+                        <li><b>Cerca, voltaje de seguridad: </b> 5 kV</li>
                     </ul>
                     <img src="images/velociraptor.jpg" alt="velociraptor">
                     <br><br>
@@ -65,7 +65,7 @@ const gameState = {
                         <li><b>Longitud:</b> 9m</li>
                         <li><b>Peso:</b> 6t</li>
                         <li><b>Alimentación:</b> hervíboro</li>
-                        <li><b>Cerca:</b> 15 kV</li>
+                        <li><b>Cerca, voltaje de seguridad:</b> 15 kV</li>
                     </ul>
                     <img src="images/triceratops.jpg" alt="Triceratops">
                     <br><br>
@@ -78,7 +78,7 @@ const gameState = {
                         <li><b>Longitud:</b> 26m</li>
                         <li><b>Peso:</b> 50t</li>
                         <li><b>Alimentación:</b> hervíboro</li>
-                        <li><b>Cerca:</b> 30 kV</li>
+                        <li><b>Cerca, voltaje de seguridad:</b> 30 kV</li>
                     </ul> 
                     <img src="images/brachiosaurus.jpg" alt="Brachiosaurus Altithorax">
                 </div>
@@ -775,7 +775,7 @@ function systemCodeCheck() {
 
         //challengeCompleted
         // Actualiza la pestaña system despues de X tiempo
-        setTimeout(() => { document.getElementById('tab-content').innerHTML = tabContents.systemUnlocked; }, 500);
+        setTimeout(() => { updateSystemUnlockedTab(); }, 500);
     } else {
         systemCode.classList.add('incorrect');
     }
@@ -809,20 +809,23 @@ function openSystem(systemId) {
 function updateSystemUnlockedTab() {
     const activeTab = document.querySelector('.tab.active');
     if (activeTab.dataset.tab === 'system' && gameState.challenges.access.completed) {
+        const electricityDisabled = gameState.currentSector < 1;
         const securityDisabled = !gameState.challenges.electricity.completed || gameState.currentSector < 2;
         const bridgeDisabled = !gameState.challenges.electricity.completed || gameState.currentSector < 3;
         
         let messageHTML = '';
         const messages = [];
         
-        if (!gameState.challenges.electricity.completed) {
-            messages.push('<li>No hay electricida.</li>');
+        if (gameState.currentSector < 1) {
+            messages.push('<li>El Jeep no ha llegado al Sector 1 - Central Eléctrica (puede moverlo y comunicarse con él en la pestaña "Comunicación")</li>');
+        } else if (gameState.currentSector >= 1 && !gameState.challenges.electricity.completed) {
+            messages.push('<li>No hay electricidad</li>');
         }
         if (gameState.challenges.electricity.completed && gameState.currentSector < 2) {
-            messages.push('<li>El Jeep no ha llegado al Sector 2 - Centro de Seguridad (muévalo mediante "cd Sector" en el Sistema de Comunicación)</li>');
+            messages.push('<li>El Jeep no ha llegado al Sector 2 - Centro de Seguridad (puede moverlo y comunicarse con él en la pestaña "Comunicación")</li>');
         }
         if (gameState.challenges.electricity.completed && gameState.currentSector < 3) {
-            messages.push('<li>El Jeep no ha llegado al Sector 3 - Puente (muévalo mediante "cd Sector" en el Sistema de Comunicación)</li>');
+            messages.push('<li>El Jeep no ha llegado al Sector 3 - Puente (puede moverlo y comunicarse con él en la pestaña "Comunicación")</li>');
         }
         
         if (messages.length > 0) {
@@ -837,8 +840,7 @@ function updateSystemUnlockedTab() {
         const html = `
             <h3 class="systems-title">Sistemas de Jurassic Park</h3>
             <div class="systems-btns">
-                <button id="system-electricity-btn" class="system-btn" onclick="openSystem('systemElectricity')">
-                    <span class="system-btn-label">Electricidad</span>
+                <button id="system-electricity-btn" class="system-btn" onclick="openSystem('systemElectricity')" ${electricityDisabled ? 'disabled' : ''}>                    <span class="system-btn-label">Electricidad</span>
                 </button>
                 <button id="system-security-btn" class="system-btn" onclick="openSystem('systemSecurity')" ${securityDisabled ? 'disabled' : ''}>
                     <span class="system-btn-label">Seguridad</span>
@@ -894,7 +896,6 @@ function systemElectricityCheck() {
         tempRadios.forEach(r => r.disabled = true);
         
         updateElectricityVisual();
-        updateSystemUnlockedTab();
         
         checkButton.disabled = true;
         checkButton.classList.add('correct');
@@ -1126,7 +1127,7 @@ function processCommand(command) {
   <strong>jeep explore</strong>                La gente del Jeep examina el área
   <strong>jeep hint</strong>                   Pedir una pista a la gente del Jeep
   <strong>helicopter [codigo]</strong>         Comunicarse con rescate aéreo
-- <strong>cd sector</strong>             El Jeep avanza al siguiente sector
+- <strong>cd sector</strong>                 El Jeep avanza al siguiente sector
 - <strong>clear</strong>                     Limpiar el terminal</div>`;
                 break;
                 
@@ -1194,7 +1195,7 @@ function processCommand(command) {
                 
             default:
                 response = `<div class="terminal-line error">Comando no reconocido: "${command}"</div>
-                        <div class="terminal-line">Escribe "ayuda" para ver comandos disponibles.</div>`;
+                        <div class="terminal-line">Escribe "help" para ver comandos disponibles.</div>`;
         }
     }
     
@@ -1326,7 +1327,7 @@ function processHelicopterCommand(command) {
     } else {
             // Caso 3: Comando sin código
         response = `<div class="terminal-line error">Comando no reconocido: "${command}"</div>
-                    <div class="terminal-line">Escribe "ayuda" para ver comandos disponibles.</div>`;
+                    <div class="terminal-line">Escribe "help" para ver comandos disponibles.</div>`;
     }
     
     return response;
