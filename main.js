@@ -154,12 +154,12 @@ const gameState = {
     jeep: {
         sector: 0,
         route: [
-            { id: 0, name: "Sector 0 - Perdidos", image: "jeep-sect0.jpg", completed: true },
-            { id: 1, name: "Sector 1 - Central Eléctrica", image: "jeep-sect1.jpg", completed: false },
-            { id: 2, name: "Sector 2 - Centro de Seguridad", image: "jeep-sect2.jpg", completed: false },
-            { id: 3, name: "Sector 2 - Centro de Seguridad", image: "jeep-sect3.jpg", completed: false },
-            { id: 4, name: "Sector 3 - Puente", image: "jeep-sect4.jpg", completed: false },
-            { id: 5, name: "Sector 4 - Helipuerto", image: "jeep-sect5.jpg", completed: false }
+            { id: 0, name: "Sector 0 - Perdidos", image: "map-visual-0.png", completed: true },
+            { id: 1, name: "Sector 1 - Central Eléctrica", image: "map-visual-1.png", completed: false },
+            { id: 2, name: "Sector 2 - Centro de Seguridad", image: "map-visual-2.png", completed: false },
+            { id: 3, name: "Sector 2 - Centro de Seguridad", image: "map-visual-3.png", completed: false },
+            { id: 4, name: "Sector 3 - Puente", image: "map-visual-4.png", completed: false },
+            { id: 5, name: "Sector 4 - Helipuerto", image: "jeep-map-visual-5.png", completed: false }
         ],
         messages: {
             status: [
@@ -1066,7 +1066,6 @@ function clearTerminal() {
     const output = document.getElementById('terminal-output');
     output.innerHTML = `<div class="terminal-line">Jurassic Park, Sistema de Comunicaciones v4.0.5</div>
                        <div class="terminal-line">Escriba "help" para ver los comandos disponibles.</div>
-                       <div class="terminal-line" id="jeep-connection">Conexión establecida con JEEP-01 en Sector ${gameState.currentSector + 1}</div>
                        <div class="terminal-line prompt">> </div>`;
 }
 
@@ -1075,12 +1074,5 @@ function updateJeepVisual() {
     const jeepImg = document.querySelector('#visual-comms img');
     const sector = gameState.currentSector;
     
-    // Si tienes imágenes específicas para cada sector
-    // jeepImg.src = `images/jeep-sector-${sector}.jpg`;
-    
-    // Por ahora actualizará solo el mensaje
-    const connectionMsg = document.getElementById('jeep-connection');
-    if (connectionMsg) {
-        connectionMsg.textContent = `Conexión establecida con JEEP-01 en Sector ${sector + 1}`;
-    }
+    jeepImg.src = `images/map-visual-${sector}.png`;
 }
