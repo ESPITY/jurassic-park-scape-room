@@ -257,13 +257,24 @@ const tabContents = {
             <button id="system-electricity-btn" class="system-btn" onclick="openSystem('systemElectricity')">
                 <span class="system-btn-label">Electricidad</span>
             </button>
-            <button id="system-security-btn" class="system-btn" onclick="openSystem('systemSecurity')">
+            <button id="system-security-btn" class="system-btn" onclick="openSystem('systemSecurity')" ${!gameState.challenges.electricity.completed || gameState.currentSector < 2 ? 'disabled' : ''}>
                 <span class="system-btn-label">Seguridad</span>
             </button>
-            <button id="system-bridge-btn" class="system-btn" onclick="openSystem('systemBridge')">
+            <button id="system-bridge-btn" class="system-btn" onclick="openSystem('systemBridge')" ${!gameState.challenges.electricity.completed || gameState.currentSector < 3 ? 'disabled' : ''}>
                 <span class="system-btn-label">Puente</span>
             </button>
         </div>
+        ${(!gameState.challenges.electricity.completed || gameState.currentSector < 2 || gameState.currentSector < 3) ? `
+        <div class="system-disabled-message">
+            <p><strong>Sistemas bloqueados:</strong></p>
+            <ul>
+                ${!gameState.challenges.electricity.completed ? '<li>No hay electricidad.</li>' : ''}
+                ${(gameState.challenges.electricity.completed && gameState.currentSector < 2) ? '<li>El Jeep no ha llegado al Sector 2 - Centro de Seguridad (muévalo mediante "cd Sector" en el Sistema de Comunicación)</li>' : ''}
+                ${(gameState.challenges.electricity.completed && gameState.currentSector < 3) ? '<li>El Jeep no ha llegado al Sector 3 - Puente (muévalo mediante "cd Sector" en el Sistema de Comunicación)</li>' : ''}
+            </ul>
+            <p><i>Completa los requisitos anteriores para desbloquear estos sistemas.</i></p>
+        </div>
+        ` : ''}
     `,
     
     systemElectricity: `
@@ -449,7 +460,7 @@ function changeTab(tabId) {
             document.getElementById('tab-content').innerHTML = tabContents.systemBlocked;
             systemCodeUpdateDisplay();  // Si hay código escrito al volver a la pestaña se muestra
         } else {
-            document.getElementById('tab-content').innerHTML = tabContents.systemUnlocked; 
+            updateSystemUnlockedTab();
         }
     } else if (tabId === 'comms') {
         document.getElementById('tab-content').innerHTML = tabContents.comms;
@@ -678,6 +689,12 @@ function systemCodeCheck() {
 
 // NAVEGACIÓN ENTRE SISTEMAS: abrir sistemas (delay intencional)
 function openSystem(systemId) {
+    // Verificar si el sistema está deshabilitado
+    const buttonId = `system-${systemId.replace('system', '').toLowerCase()}-btn`;
+    const button = document.getElementById(buttonId);
+    
+    if (button.disabled) return;
+
     const all = document.querySelectorAll('*');
     all.forEach(el => el.style.cursor = 'wait');
     
@@ -691,6 +708,55 @@ function openSystem(systemId) {
     }, 500);
 
     showSystemVisual(systemId);
+}
+
+// SISTEMAS: actualización del descbloqueo de sistemas
+function updateSystemUnlockedTab() {
+    const activeTab = document.querySelector('.tab.active');
+    if (activeTab.dataset.tab === 'system' && gameState.challenges.access.completed) {
+        const securityDisabled = !gameState.challenges.electricity.completed || gameState.currentSector < 2;
+        const bridgeDisabled = !gameState.challenges.electricity.completed || gameState.currentSector < 3;
+        
+        let messageHTML = '';
+        const messages = [];
+        
+        if (!gameState.challenges.electricity.completed) {
+            messages.push('<li>No hay electricida.</li>');
+        }
+        if (gameState.challenges.electricity.completed && gameState.currentSector < 2) {
+            messages.push('<li>El Jeep no ha llegado al Sector 2 - Centro de Seguridad (muévalo mediante "cd Sector" en el Sistema de Comunicación)</li>');
+        }
+        if (gameState.challenges.electricity.completed && gameState.currentSector < 3) {
+            messages.push('<li>El Jeep no ha llegado al Sector 3 - Puente (muévalo mediante "cd Sector" en el Sistema de Comunicación)</li>');
+        }
+        
+        if (messages.length > 0) {
+            messageHTML = `
+            <div class="system-disabled-message">
+                <p><strong>Sistemas bloqueados:</strong></p>
+                <ul>${messages.join('')}</ul>
+                <p><i>Completa los requisitos anteriores para desbloquear estos sistemas.</i></p>
+            </div>`;
+        }
+        
+        const html = `
+            <h3 class="systems-title">Sistemas de Jurassic Park</h3>
+            <div class="systems-btns">
+                <button id="system-electricity-btn" class="system-btn" onclick="openSystem('systemElectricity')">
+                    <span class="system-btn-label">Electricidad</span>
+                </button>
+                <button id="system-security-btn" class="system-btn" onclick="openSystem('systemSecurity')" ${securityDisabled ? 'disabled' : ''}>
+                    <span class="system-btn-label">Seguridad</span>
+                </button>
+                <button id="system-bridge-btn" class="system-btn" onclick="openSystem('systemBridge')" ${bridgeDisabled ? 'disabled' : ''}>
+                    <span class="system-btn-label">Puente</span>
+                </button>
+            </div>
+            ${messageHTML}
+        `;
+        
+        document.getElementById('tab-content').innerHTML = html;
+    }
 }
 
 // NAVEGACIÓN ENTRE SISTEMAS: volver al selector de sistemas
@@ -732,6 +798,7 @@ function systemElectricityCheck() {
         tempRadios.forEach(r => r.disabled = true);
         
         updateElectricityVisual();
+        updateSystemUnlockedTab();
         
         checkButton.disabled = true;
         checkButton.classList.add('correct');
@@ -1015,8 +1082,8 @@ function processCommand(command) {
                         
                         showCommunicationVisual();
                         
-                        document.getElementById('header-sector').textContent = 
-                            `${jeep.route[gameState.currentSector].name}`;
+                        document.getElementById('header-sector').textContent = `${jeep.route[gameState.currentSector].name}`;
+                        updateSystemUnlockedTab();
                     } else {
                         response = `<div class="terminal-line error">No puedes avanzar. ${requirement}</div>`;
                     }
