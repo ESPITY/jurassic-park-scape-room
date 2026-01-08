@@ -151,35 +151,74 @@ const gameState = {
                 P.d: Soy Tim :), no le digas a Lex que te he escrito esto.</p>
         `}
     ],
+    jeep: {
+        sector: 0,
+        route: [
+            { id: 0, name: "Centro de Control", image: "jeep-sect0.jpg", completed: true },
+            { id: 1, name: "Sector A - Tyrannosaurus", image: "jeep-sect1.jpg", completed: false },
+            { id: 2, name: "Sector B - Triceratops", image: "jeep-sect2.jpg", completed: false },
+            { id: 3, name: "Sector C - Velociraptor", image: "jeep-sect3.jpg", completed: false },
+            { id: 4, name: "Sector D - Brachiosaurus", image: "jeep-sect4.jpg", completed: false },
+            { id: 5, name: "Puente de Escape", image: "jeep-sect5.jpg", completed: false }
+        ],
+        messages: {
+            status: [
+                "JEEP> Sector 0 - Perdidos: Sistemas caídos. Acceda a ellos para restaurarlos.",
+                "JEEP> Sector 1 - Central Eléctrica: Sistema eléctrico caíado. Activa los generadores de emergencia.",
+                "JEEP> Sector 2 - Centro de Seguridad: Sistema eléctrico caído. Activa los generadores de emergencia.",
+                "JEEP> Sector 3 - Puente: El puente levadizo se ha quedado levantado. Bájalo desde el panel de control.",
+                "JEEP> Sector 4 - Helipuerto: Llame a la torre de control para que envíen un helicóptero",
+                "JEEP> ----"
+            ],
+            investigar: [
+                "JEEP> 'bbbssttzzbstbs'",
+                "JEEP> 'Nos hemos acercado al panel de los generadores. Código de error visible: '333-L'. Necesita parámetros específicos.'",
+                "JEEP> '¡Estamos rodeados de dinosaurios! ¡Dése prisa y active las cercas!'",
+                "JEEP> 'El diseño del panel de control del puente lo sugirió el presidente. Ahora que lo pienso era un correo muy raro.'",
+                "JEEP> '----",
+                "JEEP> '----"
+            ],
+            mover: [
+                "Ya estamos en el punto de partida. Usa 'mover' para avanzar al siguiente sector.",
+                "Avanzando al Sector B - Triceratops...",
+                "Avanzando al Sector C - Velociraptor (¡extrema precaución!)...",
+                "Avanzando al Sector D - Brachiosaurus...",
+                "Avanzando al Puente de Escape...",
+                "¡Hemos llegado al punto final! El helicóptero puede aterrizar aquí."
+            ],
+            helicoptero: [
+                "El helicóptero necesita una señal en código Morse y una confirmación en binario.",
+                "Frecuencia de rescate: 121.5 MHz. Mensaje recibido: ... --- ... (SOS)",
+                "Responder con: 'EN RUTA' en código binario (8-bits por carácter)."
+            ]
+        }
+    },
     currentChallenge: 0,
     currentSector: 0,
 };
 
 const tabContents = {
     comms: `
-        <h3>📻 Sistema de Comunicación</h3>
-        <p>Contacta con el helicóptero de rescate.</p>
-        
-        <div class="radio-controls">
-            <div class="freq-display">
-                <label>Frecuencia:</label>
-                <input type="text" id="freq-input" value="121.5" disabled>
-                <span>MHz</span>
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <span class="terminal-title">Jurassic Park Control Console</span>
             </div>
-            
-            <div class="message-section">
-                <h4>Mensaje recibido (Morse):</h4>
-                <div class="morse-display" id="morse-display">... --- ...</div>
-                
-                <h4>Traducir a texto:</h4>
-                <input type="text" id="decode-input" placeholder="SOS">
-                <button onclick="verificarDecodificacion()">Verificar</button>
-                
-                <h4>Enviar respuesta (Binario):</h4>
-                <div>Mensaje: "EN RUTA"</div>
-                <div class="binary-hint">(Consulta los documents para la tabla ASCII)</div>
-                <input type="text" id="binary-input" placeholder="01000101 01001110...">
-                <button onclick="verificarBinario()">Transmitir</button>
+            <div class="terminal-content">
+                <div id="terminal-output" class="terminal-output">
+                    <div class="terminal-line">Jurassic Park, Sistema de Comunicaciones v4.0.5</div>
+                    <div class="terminal-line">Escriba "help" para ver los comandos disponibles.</div>
+                    <div class="terminal-line">Conectando con el Jeep...</div>
+                    <div class="terminal-line" id="jeep-connection">Conexión establecida con JEEP-01 en Sector ${gameState.currentSector + 1}</div>
+                    <div class="terminal-line prompt">> </div>
+                </div>
+                <div class="terminal-input">
+                    <span class="prompt">> </span>
+                    <input type="text" id="terminal-input" autocomplete="off" 
+                        placeholder="Escribe un comando..." onkeypress="handleTerminalKey(event)">
+                </div>
+            </div>
+            <div class="terminal-hint">
+                <p>Escribe <strong>"help"</strong> para ver los comandos disponibles.</p>
             </div>
         </div>
     `,
@@ -868,5 +907,188 @@ function applyBridgeState() {
         const checkButton = document.getElementById('system-bridge-check-btn');
         checkButton.disabled = true;
         checkButton.classList.add('correct');
+    }
+}
+
+
+
+
+//---------------------------------------------
+
+
+// TERMINAL: manejar tecla Enter
+function handleTerminalKey(event) {
+    if (event.key === 'Enter') {
+        const input = document.getElementById('terminal-input');
+        const command = input.value.trim().toLowerCase();
+        input.value = '';
+        
+        if (command) {
+            processCommand(command);
+        }
+    }
+}
+
+// TERMINAL: procesar comandos
+function processCommand(command) {
+    const output = document.getElementById('terminal-output');
+    const jeep = gameState.jeep;
+    const sector = gameState.currentSector;
+    
+    // Mostrar comando
+    output.innerHTML += `<div class="terminal-line prompt">> ${command}</div>`;
+    
+    // Procesar comando
+    let response = '';
+    
+    switch(command) {
+        case 'help':
+            response = `<div class="terminal-line" style="white-space: pre">
+- <strong>echo [arg]</strong>           Enviar un mensaje
+   <strong>jeep status</strong>          Estado actual del Jeep
+   <strong>jeep find</strong>            La gente del Jeep examina el área
+   <strong>jeep hint</strong>            Pedir una pista a la gente del Jeep
+- <strong>cd Jeep [sector]</strong>     El Jeep avanza al siguiente sector
+   <strong>1-4</strong>                  Sectores del mapa
+- <strong>helicoptero</strong>          Comunicarse con rescate aéreo
+- <strong>clear</strong>                Limpiar el terminal</div>`;
+            break;
+            
+        case 'echo jeep status':
+            response = `<div class="terminal-line">${jeep.messages.status[sector]}</div>`;
+            if (sector === 0 && gameState.challenges.access.completed) {
+                response += `<div class="terminal-line success">✓ Acceso a sistemas obtenido</div>`;
+            }
+            if (sector === 1 && gameState.challenges.electricity.completed) {
+                response += `<div class="terminal-line success">✓ Electricidad restablecida</div>`;
+            }
+            if (sector === 2 && gameState.challenges.security.completed) {
+                response += `<div class="terminal-line success">✓ Cercas reactivadas</div>`;
+            }
+            if (sector === 4 && gameState.challenges.bridge.completed) {
+                response += `<div class="terminal-line success">✓ Puente bajado</div>`;
+            }
+            break;
+            
+        case 'echo jeep find':
+            response = `<div class="terminal-line">${jeep.messages.investigar[sector]}</div>`;
+            
+            // Pistas adicionales según retos completados
+            if (sector === 1 && !gameState.challenges.electricity.completed) {
+                response += `<div class="terminal-line hint">Pista: Consulta el "Manual de sistemas" en Documentos para los parámetros del código 333-L</div>`;
+            }
+            if (sector === 2 && !gameState.challenges.security.completed) {
+                response += `<div class="terminal-line hint">Pista: Cada sector necesita su voltaje específico. Consulta la guía paleontológica.</div>`;
+            }
+            if (sector === 3) {
+                response += `<div class="terminal-line hint">Pista: El patrón en el suelo muestra coordenadas: 00, 11, 22, 33, 44...</div>`;
+            }
+            break;
+        
+        case 'echo jeep hint':
+
+            break;
+            
+        case 'move':
+            if (sector < jeep.route.length - 1) {
+                // Verificar si puede avanzar (retos previos completados)
+                let canMove = true;
+                let requirement = '';
+                
+                if (sector === 0 && !gameState.challenges.access.completed) {
+                    canMove = false;
+                    requirement = 'Necesitas acceder a los sistemas primero (código en Documentos).';
+                }
+                if (sector === 1 && !gameState.challenges.electricity.completed) {
+                    canMove = false;
+                    requirement = 'La electricidad debe restablecerse antes de avanzar.';
+                }
+                if (sector === 2 && !gameState.challenges.security.completed) {
+                    canMove = false;
+                    requirement = 'Las cercas eléctricas deben reactivarse por seguridad.';
+                }
+                if (sector === 4 && !gameState.challenges.bridge.completed) {
+                    canMove = false;
+                    requirement = 'El puente debe bajarse para cruzar.';
+                }
+                
+                if (canMove) {
+                    gameState.currentSector++;
+                    response = `<div class="terminal-line">${jeep.messages.mover[sector]}</div>`;
+                    
+                    // Actualizar visual
+                    updateJeepVisual();
+                    
+                    // Actualizar header
+                    document.getElementById('header-sector').textContent = 
+                        `Sector ${gameState.currentSector} - ${jeep.route[gameState.currentSector].name}`;
+                    
+                    // Mostrar mensaje del nuevo sector
+                    setTimeout(() => {
+                        output.innerHTML += `<div class="terminal-line">${jeep.messages.status[gameState.currentSector]}</div>`;
+                        scrollTerminal();
+                    }, 500);
+                } else {
+                    response = `<div class="terminal-line error">No puedes avanzar. ${requirement}</div>`;
+                }
+            } else {
+                response = `<div class="terminal-line">Ya estás en el sector final. Usa 'helicoptero' para contactar rescate.</div>`;
+            }
+            break;
+            
+        case 'helicopter':
+            if (gameState.challenges.bridge.completed) {
+                response = `<div class="terminal-line">${jeep.messages.helicoptero[0]}</div>
+                           <div class="terminal-line">${jeep.messages.helicoptero[1]}</div>
+                           <div class="terminal-line">${jeep.messages.helicoptero[2]}</div>
+                           <div class="terminal-line hint">(Usa la pestaña Comunicaciones para responder)</div>`;
+            } else {
+                response = `<div class="terminal-line error">El puente no está bajado. No hay lugar para que aterrice el helicóptero.</div>`;
+            }
+            break;
+            
+        case 'clear':
+            output.innerHTML = `<div class="terminal-line">Jurassic Park, Sistema de Comunicaciones v4.0.5</div>
+                               <div class="terminal-line">Escriba "help" para ver los comandos disponibles.</div>
+                               <div class="terminal-line" id="jeep-connection">Conexión establecida con JEEP-01 en Sector ${gameState.currentSector + 1}</div>`;
+            break;
+            
+        default:
+            response = `<div class="terminal-line error">Comando no reconocido: "${command}"</div>
+                       <div class="terminal-line">Escribe "ayuda" para ver comandos disponibles.</div>`;
+    }
+    
+    output.innerHTML += response;
+    output.innerHTML += `<div class="terminal-line prompt">> </div>`;
+    scrollTerminal();
+}
+
+// TERMINAL: desplazar al final
+function scrollTerminal() {
+    const output = document.getElementById('terminal-output');
+    output.scrollTop = output.scrollHeight;
+}
+
+// TERMINAL: limpiar
+function clearTerminal() {
+    const output = document.getElementById('terminal-output');
+    output.innerHTML = `<div class="terminal-line">Jurassic Park, Sistema de Comunicaciones v4.0.5</div>
+                       <div class="terminal-line">Escriba "help" para ver los comandos disponibles.</div>
+                       <div class="terminal-line" id="jeep-connection">Conexión establecida con JEEP-01 en Sector ${gameState.currentSector + 1}</div>
+                       <div class="terminal-line prompt">> </div>`;
+}
+
+// ACTUALIZAR VISUAL DEL JEEP
+function updateJeepVisual() {
+    const jeepImg = document.querySelector('#visual-comms img');
+    const sector = gameState.currentSector;
+    
+    // Si tienes imágenes específicas para cada sector
+    // jeepImg.src = `images/jeep-sector-${sector}.jpg`;
+    
+    // Por ahora actualizará solo el mensaje
+    const connectionMsg = document.getElementById('jeep-connection');
+    if (connectionMsg) {
+        connectionMsg.textContent = `Conexión establecida con JEEP-01 en Sector ${sector + 1}`;
     }
 }

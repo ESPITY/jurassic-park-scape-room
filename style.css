@@ -142,6 +142,7 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong, ul, li, b, div {
     padding: 10px;
     text-align: center;
     cursor: pointer;
+    user-select: none;
     background-color: #c0c0c0;
 
     border-radius: 2px;
@@ -202,6 +203,7 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong, ul, li, b, div {
 
     padding: 20px;
     cursor: pointer;
+    user-select: none;
     color: #333333;
     background-color: #c0c0c0;
 
@@ -883,3 +885,136 @@ body *::-webkit-scrollbar-button:single-button:horizontal:increment {
 body *::-webkit-scrollbar-corner {
   background: silver;
 }
+
+
+
+
+/* TERMINAL DE COMUNICACIONES */
+.terminal-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #c0c0c0;
+    color: white;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    overflow: hidden;
+}
+
+.terminal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #c0c0c0;
+
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+.terminal-title {
+    color: black;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.terminal-content {
+    flex: 1;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    background-color: #c0c0c0;
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+.terminal-output {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    background-color: #263f89;
+    margin-bottom: 10px;
+    min-height: 300px;
+
+        border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+
+.terminal-line {
+    margin-bottom: 5px;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.terminal-line.prompt {
+    color: #00aaff;
+    font-weight: bold;
+}
+
+.terminal-line.success {
+    color: #00ff88;
+}
+
+.terminal-line.error {
+    color: #ff5555;
+}
+
+.terminal-line.hint {
+    color: #ffff55;
+    font-style: italic;
+}
+
+.terminal-input {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #263f89;
+
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+
+.terminal-input .prompt {
+    color: #00ff00;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.terminal-input input {
+    flex: 1;
+    background-color: transparent;
+    border: none;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+    outline: none;
+}
+
+.terminal-input input::placeholder {
+    color: #008888;
+}
+
+.terminal-hint {
+    padding: 10px 15px;
+    font-size: 0.8em;
+    color: black;
+    background-color: #c0c0c0;
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
