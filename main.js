@@ -946,6 +946,8 @@ function processCommand(command) {
     const output = document.getElementById('terminal-output');
     const jeep = gameState.jeep;
     const sector = gameState.currentSector;
+
+    removeEndEmptyPrompt(output);
     
     // Mostrar comando
     output.innerHTML += `<div class="terminal-line prompt">> ${command}</div>`;
@@ -1126,4 +1128,15 @@ function restoreTerminalState() {
         
         scrollTerminal();
     }, 10);
+}
+
+// Función auxiliar para eliminar prompts vacíos del final del terminal
+function removeEndEmptyPrompt(outputElement) {
+    const lines = outputElement.children;
+    if (lines.length > 0) {
+        const lastLine = lines[lines.length - 1];
+        if (lastLine.classList.contains('prompt') && lastLine.textContent.trim() === '>') {
+            outputElement.removeChild(lastLine);
+        }
+    }
 }
