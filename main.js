@@ -143,6 +143,7 @@ const gameState = {
     ],
     currentChallenge: 0,
     currentSector: 0,
+                selectedSquares: []
 };
 
 const tabContents = {
@@ -291,7 +292,7 @@ const tabContents = {
     `,
     
     systemSecurity: `
-        <div class="system-slider-container">
+        <div class="system-security-container">
             <h3>Sistema de Seguridad - Cercas Eléctricas</h3>
             <p>Ajustes de cada sector:</p>
            
@@ -324,7 +325,12 @@ const tabContents = {
     `,
 
     systemBridge: `
-
+        <div class="system-bridge-container">
+            <h3>Sistema del Puente</h3>
+            <div class="bridge-button-grid" id="bridge-button-grid">
+                <!-- Se genera dinámicamente -->
+            </div>
+        </div>
     `,
     
     docs: `        
@@ -377,7 +383,7 @@ function changeTab(tabId) {
             document.getElementById('tab-content').innerHTML = tabContents.systemBlocked;
             systemCodeUpdateDisplay();  // Si hay código escrito al volver a la pestaña se muestra
         } else {
-            document.getElementById('tab-content').innerHTML = tabContents.systemUnlocked;      
+            document.getElementById('tab-content').innerHTML = tabContents.systemUnlocked; 
         }
     } else {
         // Para otras pestañas, cargar contenido normal
@@ -396,6 +402,12 @@ function changeVisuals(tabId) {
     switch(tabId) {
         case 'comms':
             document.getElementById('visual-comms').classList.add('active');
+
+            // if (gameState.challenges.bridge.completed) {
+            //     bridgeImg.src = 'images/bridge-down.png';
+            // } else {
+            //     bridgeImg.src = 'images/bridge-up.png';
+            // }
             break;
         case 'system':
             document.getElementById('visual-systems').classList.add('active');
@@ -476,7 +488,6 @@ function showDocsDefaultVisual() {
     `;
 }
 
-
 // DOCUMENTOS: carga la lista de documentos visibles y marca los leídos
 function loadDocumentList() {
     const list = document.getElementById('documents-list');
@@ -521,20 +532,6 @@ function showDocument(id) {
         activeDocumentElement.classList.add('active');
     }
 
-    /*
-        const listaDocumentos = document.getElementById('documents-list');
-        const todosDocumentos = listaDocumentos.querySelectorAll('.document');
-
-        // Primero: remover 'active' de todos en esta lista
-        todosDocumentos.forEach(doc => doc.classList.remove('active'));
-
-        // Segundo: agregar 'active' al específico
-        const documentoActivo = listaDocumentos.querySelector(`.document[data-id="${id}"]`);
-        if (documentoActivo) {
-            documentoActivo.classList.add('active');
-        }
-    */
-
     if (id == 1) updateChecklist(); // Actualiza la lista de tareas (checkbox)
 }
 
@@ -549,7 +546,7 @@ function updateChecklist() {
     }
 }
 
-// RETOS: marcar el reto recibido como completado
+/* RETOS: marcar el reto recibido como completado
 function challengeCompleted(challengeId) {
     if (!gameState.challenges[challengeId].completed) {
         gameState.challenges[challengeId].completed = true;
@@ -557,7 +554,7 @@ function challengeCompleted(challengeId) {
         
         //updateChecklist();
     }
-}
+}*/
 
 // RETO 1: acceso a los sistemas
 function systemCodeAddDigit(digit) {
@@ -607,9 +604,6 @@ function systemCodeCheck() {
     } else {
         systemCode.classList.add('incorrect');
     }
-    
-    //updateProgress();
-    //checkGameComplete();
 }
 
 
@@ -623,6 +617,7 @@ function openSystem(systemId) {
         all.forEach(el => el.style.cursor = '');
         if (gameState.challenges.security.completed) applySecurityState();
         if (gameState.challenges.electricity.completed) applyElectricityState();
+        if(systemId === "systemBridge") showButtonGrid();
     }, 500);
 
     showSystemVisual(systemId);
@@ -772,4 +767,77 @@ function applySecurityState() {
         checkButton.disabled = true;
         checkButton.classList.add('correct');
     }
+}
+
+// RETO 4: grid de botones con dibujo
+function showButtonGrid() {
+    const board = document.getElementById('bridge-button-grid');
+    board.innerHTML = '';
+    
+    // Coordenadas donde fila+columna = 5
+    const solutionSquares = [
+        'a1', 'b2', 'c3', 'd4', 'e5', 'f6', 'g7', 'h8'
+    ];
+    
+    for (let row = 5; row >= 1; row--) {
+        for (let col = 1; col <= 5; col++) {
+            const square = document.createElement('div');
+            square.className = 'bridge-button-grid-square';
+            
+            // Coordenada en notación ajedrez
+            const colLetter = String.fromCharCode(96 + col);
+            const coord = colLetter + row;
+            
+            square.dataset.coord = coord;
+            square.textContent = coord;
+            
+            square.addEventListener('click', () => {
+                toggleChessSquare(square);
+            });
+            
+            board.appendChild(square);
+        }
+    }
+}
+
+function toggleChessSquare(square) {
+    const coord = square.dataset.coord;
+    const index = gameState.selectedSquares.indexOf(coord);
+    
+    if (index === -1) {
+        gameState.selectedSquares.push(coord);
+        square.classList.add('selected');
+    } else {
+        gameState.selectedSquares.splice(index, 1);
+        square.classList.remove('selected');
+    }
+}
+
+function checkNavigation() {
+    const feedback = document.getElementById('navigationFeedback');
+    
+    // Solución: coordenadas donde fila+columna = 5
+    const correctSquares = ['a1', 'b2', 'c3', 'd4', 'e5', 'f6', 'g7', 'h8'];
+    const selected = gameState.selectedSquares;
+    
+    // Verificar que todas las seleccionadas sean correctas
+    const allCorrect = selected.every(sq => correctSquares.includes(sq));
+    // Verificar que se seleccionaron al menos 3
+    const enoughSelected = selected.length >= 3;
+    // Verificar que el decoder esté en posición múltiplo de 45
+    const decoderCorrect = gameState.decoderRotation % 45 === 0;
+    
+    if (allCorrect && enoughSelected && decoderCorrect) {
+        feedback.textContent = '✅ ¡Navegación corregida! Ruta establecida.';
+        feedback.className = 'feedback success';
+        gameState.navigationSolved = true;
+        document.getElementById('task3').classList.add('completed');
+        document.querySelector('#task3 .task-checkbox').checked = true;
+    } else {
+        feedback.textContent = '❌ Selecciona casillas donde fila+columna=5 y alinea el disco';
+        feedback.className = 'feedback error';
+    }
+    
+    updateProgress();
+    checkGameComplete();
 }

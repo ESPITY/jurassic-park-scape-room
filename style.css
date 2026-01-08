@@ -558,7 +558,7 @@ input[type="radio"]:disabled{
 #system-electricity-check-btn.correct { background-color: #75ba67; }
 
 /* RETO 3: contenedor del panel de seguridad */
-.system-slider-container {
+.system-security-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -690,37 +690,77 @@ input[type="radio"]:disabled{
 #system-security-check-btn.incorrect { background-color: #bb6868; }
 #system-security-check-btn.correct { background-color: #75ba67; }
 
-
-
-/* -----------------*/
-
-
-#visual-comms {
-    background: #263f89;
+/* RETO 4: contenedor del panel del puente */
+.system-bridge-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    width: 100%;
+    gap: 40px; 
+    background-color: inherit;
+    background-color: #c0c0c0;
+    
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
 }
 
-#visual-systems {
-    background: rgb(0, 0, 0);
+/* RETO 4: grid de botones */
+.bridge-button-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    width: 500px;
+    height: 500px;
+    margin: 20px auto;
+    background-color: #494c4f;
+    padding: 4px;
+
+    border-width: 4px;
+    border-style: solid;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
 }
 
-#visual-electricity {
-    background: rgb(255, 45, 3);
+.bridge-button-grid-square {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: #c0c0c0;
+
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
 }
 
-#visual-bridge {
-    background: rgb(255, 45, 3);
-}
-
-#visual-jeep {
-    background: rgb(255, 45, 3);
-}
 
 
-.aa {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+.bridge-button-grid-square.selected {
+    background-color: #b966af !important;
+    color: white;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
 }
+
+.bridge-button-grid-square:hover:not(:disabled) {
+    color: black;
+    background-color: #dddbdb;
+}
+
+.bridge-button-grid-square:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;    
+}
+
 
 
 
