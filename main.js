@@ -85,7 +85,41 @@ const gameState = {
             `},
 
         { id: 4, title: "Manual de sistemas", show: false, read: false,
-            text: "El puente necesita 8m de madera. Resistencia: 500kg/m. Peso jeep: 2500kg." },
+            text: `
+                <div class="dinosaur-wiki">
+                    <h4>Generadores Eéctricos</h4>
+                    <p>En caso de caída del sistema de electricidad deberían arrancar los generadores eléctricos de forma automática. 
+                    Si fallan, verificar su status.</p>
+                    <br><p>Códigos de error:</p>
+                    <ul>
+                        <li>405-C: introduzca los siguientes parámetros:</li>
+                            <ul>
+                            <li>Presión: 300 PSI</li>
+                            <li>Combustible: 200 L/h</li>
+                            <li>Temperatura: 85 °C</li>
+                            </ul>
+                        <li>66-T: introduzca los siguientes parámetros:</li>
+                            <ul>
+                            <li>Presión: 120 PSI</li>
+                            <li>Combustible: 500 L/h</li>
+                            <li>Temperatura: 90 °C</li>
+                            </ul>
+                        <li>333-L: introduzca los siguientes parámetros:</li>
+                            <ul>
+                            <li>Presión: 120 PSI</li>
+                            <li>Combustible: 380 L/h</li>
+                            <li>Temperatura: 85 °C</li>
+                            </ul>
+                        <li>781-E: introduzca los siguientes parámetros:</li>
+                            <ul>
+                            <li>Presión: 50 PSI</li>
+                            <li>Combustible: 500 L/h</li>
+                            <li>Temperatura: 75 °C</li>
+                            </ul>
+                    </ul>
+                </div>
+
+            `},
 
         { id: 5, title: "✉ Felicitación navideña", show: false, read: false,
             text: `
