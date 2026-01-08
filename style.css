@@ -5,7 +5,7 @@
     padding: 0;
 }
 
-p, h1, h2, h3, h4, h5, h6, span, i, strong {
+p, h1, h2, h3, h4, h5, h6, span, i, strong, ul, li, b, div {
     background-color: inherit;
 }
 
@@ -186,6 +186,7 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong {
     width: 100%;
     padding: 20px;
     background-color: white;
+    overflow-y: auto;
 }
 
 /* DOCUMENTO DE LA LISTA: asignada dinámicamente  */
@@ -256,6 +257,15 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong {
 
 .jurassic-park-logo-docs {
     background-color: inherit;
+}
+
+/* GUÍA PALEONTOLÓGICA*/
+.dinosaur-wiki ul { padding-left: 20px; }
+
+.dinosaur-wiki img {
+    display: block;
+    margin: auto;
+    min-height: 150px;
 }
 
 /* IMAGEN VISUAL DE LOS SISTEMAS*/

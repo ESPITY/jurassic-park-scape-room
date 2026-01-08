@@ -1,7 +1,7 @@
 // ========== status GLOBAL DEL JUEGO ==========
 const gameState = {
     challenges: {
-        access: { status: 'active', completed: false, solution: {code: "1016"}, answer: {code: ''}},
+        access: { status: 'active', completed: false, solution: {code: "6015"}, answer: {code: ''}},
         electricity: { status: 'locked', completed: false, solution: {} },
         security: { status: 'locked', completed: false, solution: {code: "1111"} },
         bridge: { status: 'locked', completed: false, solution: {} },
@@ -19,16 +19,74 @@ const gameState = {
                     <p><span id="helicopter" class="checkbox">☐</span> Llamar al helicóptero</p>
                 </div>
         `},
+
         { id: 2, title: "✉ Seguridad", show: true, read: false,
             text: `
                 <p><i>dennisnedry@jurassicpark.com</i></p><br>
                 <p>Se le notifica que se ha realizado el cambio mensual de la contraseña de los sitemas.<br>
                 Es la suma de los pesos de un dinosaurio herbívoro del periodo Cretácico y el dinosaurio más pequeño.</p>
         `},
+
         { id: 3, title: "Guía paleontológica", show: true, read: false,
-            text: "Helipuerto en coordenadas X: 7, Y: 7. Evitar sector T-Rex en X: 3, Y: 3." },
+            text: `
+                <div class="dinosaur-wiki">
+                    <h4>Tyrannosaurus Rex</h4>
+                    <p>Su nombre en griego significa "rey lagarto tirano". Era uno de los depredadores bípedos más feroces. 
+                    Tenía un cráneo y dientes muy grandes lo que le aportaba una mordida poderosa. 
+                    A pesar de su corta longitud, sus brazos eran robustos y terminaban en dos afiladas garras.</p>
+                    <ul>
+                        <li><b>Periodo:</b> Cretácico Superior (~68-66 millones de años)</li>
+                        <li><b>Longitud:</b> 13m</li>
+                        <li><b>Peso:</b> 9t</li>
+                        <li><b>Alimentación:</b> carnívoro</li>
+                        <li><b>Cerca:</b> </li>
+                    </ul>
+                    <img src="images/tyrannosaurus-rex.jpg" alt="Tyrannosaurus Rex">
+                    <br><br>
+                    <h4>Velociraptor</h4>
+                    <p>Su nombre, que en griego significa "ladrón veloz". Era depredador pequeño, ágil y emplumado. 
+                    Su arma más temible era una gran garra en forma de hoz en cada pata trasera, 
+                    que usaba para herir mortalmente a sus presas, a las que probablemente cazaba en grupo.</p>
+                    <ul>
+                        <li><b>Periodo:</b> Cretácico Superior (~75-71 millones de años)</li>
+                        <li><b>Longitud:</b> 1,8m</li>
+                        <li><b>Peso:</b> 15kg</li>
+                        <li><b>Alimentación:</b> carnívoro</li>
+                        <li><b>Cerca:</b> </li>
+                    </ul>
+                    <img src="images/velociraptor.jpg" alt="velociraptor">
+                    <br><br>
+                    <h4>Triceratops</h4>
+                    <p> Su nombre en griego significa "cara con tres cuernos". 
+                    Este dinosaurio tenía una gran cabeza con tres cuernos y un volante óseo (gola) que protegía su cuello. 
+                    Era un animal robusto y cuadrúpedo, con una poderosa mandíbula en forma de pico para cortar vegetación dura.</p>
+                    <ul>
+                        <li><b>Periodo:</b> Cretácico Superior (~68-66 millones de años)</li>
+                        <li><b>Longitud:</b> 9m</li>
+                        <li><b>Peso:</b> 6t</li>
+                        <li><b>Alimentación:</b> hervíboro</li>
+                        <li><b>Cerca:</b> </li>
+                    </ul>
+                    <img src="images/triceratops.jpg" alt="Triceratops">
+                    <br><br>
+                    <h4>Brachiosaurus Altithorax</h4>
+                    <p>Su nombre, que en griego significa "lagarto brazo de tórax alto", describe su anatomía. 
+                    Tenía un cuello muy largo y sus patas delanteras más largas que las traseras, algo inusual en los dinosaurios saurópodos. 
+                    Esta adaptación le permitía alimentarse de las hojas más altas de los árboles, era folívoro.</p>
+                    <ul>
+                        <li><b>Periodo:</b> Jurásico Superior (~154-153 millones de años)</li>
+                        <li><b>Longitud:</b> 26m</li>
+                        <li><b>Peso:</b> 50t</li>
+                        <li><b>Alimentación:</b> hervíboro</li>
+                        <li><b>Cerca:</b> </li>
+                    </ul> 
+                    <img src="images/brachiosaurus.jpg" alt="Brachiosaurus Altithorax">
+                </div>
+            `},
+
         { id: 4, title: "Manual de sistemas", show: false, read: false,
             text: "El puente necesita 8m de madera. Resistencia: 500kg/m. Peso jeep: 2500kg." },
+
         { id: 5, title: "✉ Felicitación navideña", show: false, read: false,
             text: `
                 <p><i>johnhammond@jurassicpark.com</i></p><br>
