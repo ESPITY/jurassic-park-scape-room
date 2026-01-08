@@ -646,9 +646,9 @@ function updateSecurityVisual() {
 function updateBridgeVisual() {
     const bridgeImg = document.querySelector('#visual-system-bridge img');
     if (gameState.challenges.bridge.completed) {
-        bridgeImg.src = 'images/bridge-down.png';
+        bridgeImg.src = 'images/bridge-visual-completed.png';
     } else {
-        bridgeImg.src = 'images/bridge-up.png';
+        bridgeImg.src = 'images/bridge-visual-incomplete.png';
     }
 }
 
@@ -858,6 +858,7 @@ function updateSystemUnlockedTab() {
 function backToSystem() {
     document.getElementById('tab-content').innerHTML = tabContents.systemUnlocked;
     showSystemVisual('systemDefault');
+    updateSystemUnlockedTab();
 }
 
 // RETO 2: reactivar el generador
