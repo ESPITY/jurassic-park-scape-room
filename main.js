@@ -154,7 +154,7 @@ const gameState = {
     jeep: {
         sector: 0,
         route: [
-            { id: 0, name: "Sector 0 - Perdidos", image: "map-visual-0.png", completed: true },
+            { id: 0, name: "Sector 0 - Indefinido", image: "map-visual-0.png", completed: true },
             { id: 1, name: "Sector 1 - Central Eléctrica", image: "map-visual-1.png", completed: false },
             { id: 2, name: "Sector 2 - Centro de Seguridad", image: "map-visual-2.png", completed: false },
             { id: 3, name: "Sector 2 - Centro de Seguridad", image: "map-visual-3.png", completed: false },
@@ -163,7 +163,7 @@ const gameState = {
         ],
         messages: {
             status: [
-                "JEEP> Sector 0 - Perdidos: Sistemas caídos. Acceda a ellos para restaurarlos.",
+                "JEEP> Sector 0 - Indefinido: Sistemas caídos. Acceda a ellos para restaurarlos.",
                 "JEEP> Sector 1 - Central Eléctrica: Sistema eléctrico caído. Activa los generadores de emergencia.",
                 "JEEP> Sector 2 - Centro de Seguridad: Las cercas eléctricas están desactivadas. Debe reactivarlas",
                 "JEEP> Sector 3 - Puente: El puente levadizo se ha quedado levantado. Bájalo desde el panel de control.",
@@ -193,7 +193,7 @@ const gameState = {
             ]
         }
     },
-    currentChallenge: 0,
+    //currentChallenge: 0,
     currentSector: 0,
 };
 
@@ -939,33 +939,20 @@ function processCommand(command) {
         case 'help':
             response = `<div class="terminal-line" style="white-space: pre">
 - <strong>echo [arg]</strong>           Enviar un mensaje
-   <strong>jeep status</strong>          Estado actual del Jeep
-   <strong>jeep explore</strong>            La gente del Jeep examina el área
-   <strong>jeep hint</strong>            Pedir una pista a la gente del Jeep
-- <strong>cd Jeep [sector]</strong>     El Jeep avanza al siguiente sector
-   <strong>1-4</strong>                  Sectores del mapa
+   <strong>jeep status</strong>            Estado actual del Jeep
+   <strong>jeep explore</strong>           La gente del Jeep examina el área
+   <strong>jeep hint</strong>              Pedir una pista a la gente del Jeep
+- <strong>cd nextSector</strong>        El Jeep avanza al siguiente sector
 - <strong>helicoptero</strong>          Comunicarse con rescate aéreo
 - <strong>clear</strong>                Limpiar el terminal</div>`;
             break;
             
         case 'echo jeep status':
-            response = `<div class="terminal-line">${jeep.messages.status[sector]}</div>`;
-            if (sector === 0 && gameState.challenges.access.completed) {
-                response += `<div class="terminal-line success">✓ Acceso a sistemas obtenido</div>`;
-            }
-            if (sector === 1 && gameState.challenges.electricity.completed) {
-                response += `<div class="terminal-line success">✓ Electricidad restablecida</div>`;
-            }
-            if (sector === 2 && gameState.challenges.security.completed) {
-                response += `<div class="terminal-line success">✓ Cercas reactivadas</div>`;
-            }
-            if (sector === 4 && gameState.challenges.bridge.completed) {
-                response += `<div class="terminal-line success">✓ Puente bajado</div>`;
-            }
+            response = getJeepResponse(sector, 'status');
             break;
             
         case 'echo jeep explore':
-            response = `<div class="terminal-line">${jeep.messages.explore[sector]}</div>`;
+            response = getJeepResponse(sector, 'explore');
             break;
         
         case 'echo jeep hint':
@@ -989,37 +976,29 @@ function processCommand(command) {
                 
                 if (sector === 0 && !gameState.challenges.access.completed) {
                     canMove = false;
-                    requirement = 'Necesitas acceder a los sistemas primero (código en Documentos).';
+                    requirement = 'Necesitas acceder a los sistemas primero.';
                 }
                 if (sector === 1 && !gameState.challenges.electricity.completed) {
                     canMove = false;
-                    requirement = 'La electricidad debe restablecerse antes de avanzar.';
+                    requirement = 'El Jeep no tiene electricidad.';
                 }
                 if (sector === 2 && !gameState.challenges.security.completed) {
                     canMove = false;
-                    requirement = 'Las cercas eléctricas deben reactivarse por seguridad.';
+                    requirement = 'El Jeep está rodeado de dinosaurios.';
                 }
                 if (sector === 4 && !gameState.challenges.bridge.completed) {
                     canMove = false;
-                    requirement = 'El puente debe bajarse para cruzar.';
+                    requirement = 'El puente levadizo no está bajado.';
                 }
                 
                 if (canMove) {
                     gameState.currentSector++;
                     response = `<div class="terminal-line">${jeep.messages.move[sector]}</div>`;
                     
-                    // Actualizar visual
-                    updateJeepVisual();
+                    showCommunicationVisual();
                     
-                    // Actualizar header
                     document.getElementById('header-sector').textContent = 
                         `${jeep.route[gameState.currentSector].name}`;
-                    
-                    // Mostrar mensaje del nuevo sector
-                    setTimeout(() => {
-                        output.innerHTML += `<div class="terminal-line">${jeep.messages.status[gameState.currentSector]}</div>`;
-                        scrollTerminal();
-                    }, 500);
                 } else {
                     response = `<div class="terminal-line error">No puedes avanzar. ${requirement}</div>`;
                 }
@@ -1055,6 +1034,25 @@ function processCommand(command) {
     scrollTerminal();
 }
 
+// Diferentes mensajes si el rato actual ha sido completado y no se ha movido
+function getJeepResponse(sector, messageType) {
+    const challenges = gameState.challenges;
+    const messages = gameState.jeep.messages[messageType];
+    
+    const sectorChallenges = {
+        0: { completed: challenges.access.completed, successMsg: 'Acceso a sistemas obtenido. Mueva el Jeep al siguiente sector.' },
+        1: { completed: challenges.electricity.completed, successMsg: 'Electricidad restablecida. Mueva el Jeep al siguiente sector.' },
+        2: { completed: challenges.security.completed, successMsg: 'Cercas reactivadas. Mueva el Jeep al siguiente sector.' },
+        4: { completed: challenges.bridge.completed, successMsg: 'Puente bajado. Mueva el Jeep al siguiente sector.' }
+    };
+    
+    if (sectorChallenges[sector] && sectorChallenges[sector].completed) {
+        return `<div class="terminal-line success">${sectorChallenges[sector].successMsg}</div>`;
+    }
+    
+    return `<div class="terminal-line">${messages[sector]}</div>`;
+}
+
 // TERMINAL: desplazar al final
 function scrollTerminal() {
     const output = document.getElementById('terminal-output');
@@ -1070,7 +1068,7 @@ function clearTerminal() {
 }
 
 // ACTUALIZAR VISUAL DEL JEEP
-function updateJeepVisual() {
+function showCommunicationVisual() {
     const jeepImg = document.querySelector('#visual-comms img');
     const sector = gameState.currentSector;
     
