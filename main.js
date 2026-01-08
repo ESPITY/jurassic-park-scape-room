@@ -191,7 +191,14 @@ const gameState = {
                 "Frecuencia de rescate: 121.5 MHz. Mensaje recibido: ... --- ... (SOS)",
                 "Responder con: 'EN RUTA' en código binario (8-bits por carácter)."
             ]
-        }
+        },
+        terminalHistory: null,
+        terminalInputValue: '',
+        terminalInitialContent: `
+        <div class="terminal-line">Jurassic Park, Sistema de Comunicaciones v4.0.5</div>
+        <div class="terminal-line">Escriba "help" para ver los comandos disponibles.</div>
+        <div class="terminal-line prompt">> </div>
+        `
     },
     //currentChallenge: 0,
     currentSector: 0,
@@ -401,6 +408,10 @@ window.onload = function() {
 
     document.getElementById('tab-content').innerHTML = tabContents.comms;
 
+    // Inicializar el historial del terminal
+    const terminalOutput = document.getElementById('terminal-output');
+    if (terminalOutput) gameState.jeep.terminalHistory = terminalOutput.innerHTML;
+
     startTimer(60 * 60); // 60 min
 };
 
@@ -425,10 +436,14 @@ function startTimer(timerTime) {
 
 // PESTAÑAS: cambia a la pestaña recibida (class "tab active"), carga su contenido y el área visual (izq)
 function changeTab(tabId) {
+    // Guardar estado actual del terminal si estamos en la pestaña de comunicaciones
+    const currentActiveTab = document.querySelector('.tab.active');
+    if (currentActiveTab && currentActiveTab.dataset.tab === 'comms') saveTerminalState();
+
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     event.target.classList.add('active');
     
-    document.getElementById('tab-content').innerHTML = tabContents[tabId];
+    //document.getElementById('tab-content').innerHTML = tabContents[tabId];
 
     // Si no se ha superado el reto 1 (access) se muestra el panel (bloqueado), de lo contrario los botones del sistema (desbloqueado)
     if (tabId === 'system') {
@@ -438,6 +453,9 @@ function changeTab(tabId) {
         } else {
             document.getElementById('tab-content').innerHTML = tabContents.systemUnlocked; 
         }
+    } else if (tabId === 'comms') {
+        document.getElementById('tab-content').innerHTML = tabContents.comms;
+        restoreTerminalState();
     } else {
         // Para otras pestañas, cargar contenido normal
         document.getElementById('tab-content').innerHTML = tabContents[tabId];
@@ -1019,9 +1037,8 @@ function processCommand(command) {
             break;
             
         case 'clear':
-            output.innerHTML = `<div class="terminal-line">Jurassic Park, Sistema de Comunicaciones v4.0.5</div>
-                               <div class="terminal-line">Escriba "help" para ver los comandos disponibles.</div>
-                               <div class="terminal-line" id="jeep-connection">Conexión establecida con JEEP-01 en Sector ${gameState.currentSector + 1}</div>`;
+            clearTerminal();
+            return;
             break;
             
         default:
@@ -1032,6 +1049,7 @@ function processCommand(command) {
     output.innerHTML += response;
     output.innerHTML += `<div class="terminal-line prompt">> </div>`;
     scrollTerminal();
+    saveTerminalState();
 }
 
 // Diferentes mensajes si el rato actual ha sido completado y no se ha movido
@@ -1067,10 +1085,45 @@ function clearTerminal() {
                        <div class="terminal-line prompt">> </div>`;
 }
 
-// ACTUALIZAR VISUAL DEL JEEP
-function showCommunicationVisual() {
-    const jeepImg = document.querySelector('#visual-comms img');
-    const sector = gameState.currentSector;
+// TERMINAL: limpiar
+function clearTerminal() {
+    const output = document.getElementById('terminal-output');
     
-    jeepImg.src = `images/map-visual-${sector}.png`;
+    output.innerHTML = gameState.jeep.terminalInitialContent;
+    scrollTerminal();
+    
+    saveTerminalState();
+}
+
+// TERMINAL: guardar el estado del terminal
+function saveTerminalState() {
+    const terminalOutput = document.getElementById('terminal-output');
+    const terminalInput = document.getElementById('terminal-input');
+    
+    if (terminalOutput) gameState.jeep.terminalHistory = terminalOutput.innerHTML;
+    if (terminalInput) gameState.jeep.terminalInputValue = terminalInput.value;
+}
+
+// TERMINAL: restaura el estado del terminal
+function restoreTerminalState() {
+    setTimeout(() => {
+        const terminalOutput = document.getElementById('terminal-output');
+        const terminalInput = document.getElementById('terminal-input');
+        
+        if (terminalOutput) {
+            if (gameState.jeep.terminalHistory) {
+                terminalOutput.innerHTML = gameState.jeep.terminalHistory;
+            } else {
+                // Contenido inicial si no hay historial
+                terminalOutput.innerHTML = gameState.jeep.terminalInitialContent;
+            }
+        }
+        
+        if (terminalInput) {
+            terminalInput.value = gameState.jeep.terminalInputValue || '';
+            terminalInput.onkeypress = handleTerminalKey;
+        }
+        
+        scrollTerminal();
+    }, 10);
 }
