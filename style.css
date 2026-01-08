@@ -434,9 +434,113 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong, ul, li, b, div {
 #system-bridgey-btn:disabled { background-image: url("images/system-bridge-disabled.png"); }
 #system-bridge-btn:active { border: 1px dashed #c0c0c0; }
 
+/* RETO 2: contenedor del panel de seguridad*/
+.system-electricity-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    width: 100%;
+    gap: 20px;
+    overflow-x: hidden;
+    background-color: inherit;
+    background-color: #c0c0c0;
+    
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
 
+.system-electricity-code {
+    padding: 10px;
+    background-color: white;
+    border-radius: 2px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
 
+input[type="text"] {
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+}
 
+input[type="text"]:focus { outline: none; }
+
+.electricity-options {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 80%;
+    padding: 20px;
+    overflow-x: hidden;
+    border-radius: 1px;
+    border-width: 4px;
+    border-style: double;
+    border-color: #808080;
+}
+
+.option-title {
+    min-width: 200px;
+    text-align: left;
+    font-weight: 800;
+}
+
+.option-container {
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+}
+
+.option-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.option-item input[type="radio"] {
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.option-item label {
+    color: #333;
+}
+
+input[type="radio"] {
+    background-color: white;
+    appearance: none;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-width: 4px;
+    border-style: solid;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+
+input[type="radio"]:checked {
+    background-color: black;
+}
+
+input[type="radio"]:before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border-width: 3px;
+    border-style: solid;
+    border-color: white;
+}
 
 
 

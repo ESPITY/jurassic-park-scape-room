@@ -2,7 +2,7 @@
 const gameState = {
     challenges: {
         access: { status: 'active', completed: false, solution: {code: "6015"}, answer: {code: ''}},
-        electricity: { status: 'locked', completed: false, solution: {} },
+        electricity: { status: 'locked', completed: false, solution: {code: "223"} },
         security: { status: 'locked', completed: false, solution: {code: "1111"}, answer: {code: ''} },
         bridge: { status: 'locked', completed: false, solution: {} },
         helicopter: { status: 'locked', completed: false, solution: {} }
@@ -170,12 +170,86 @@ const tabContents = {
     `,
     
     systemElectricity: `
-
+        <div class="system-electricity-container">
+            <h3>Sistema Eléctrico - Generador</h3>
+            <p>Ajustes del generador:</p>
+            <div>
+                <label for="code"><b>Código:</b></label>
+                <input type="text" id="code" name="code" class="system-electricity-code">
+            </div>
+            <div class="electricity-options">
+                <div class="option-title">Presión:</div>
+                <div class="option-container">
+                    <div class="option-item">
+                        <input type="radio" id="pressure1" name="pressure" value="1">
+                        <label for="pressure1">50 PSI</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="radio" id="pressure2" name="pressure" value="2">
+                        <label for="pressure2">120 PSI</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="radio" id="pressure3" name="pressure" value="3">
+                        <label for="pressure3">200 PSI</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="radio" id="pressure4" name="pressure" value="4">
+                        <label for="pressure4">300 PSI</label>
+                    </div>
+                </div>
+            </div>
+            <div class="electricity-options">
+                <div class="option-title">Combustible:</div>
+                <div class="option-container">
+                    <div class="option-item">
+                        <input type="radio" id="fuel1" name="fuel" value="1">
+                        <label for="fuel1">200 L/h</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="radio" id="fuel2" name="fuel" value="2">
+                        <label for="fuel2">380 L/h</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="radio" id="fuel3" name="fuel" value="3">
+                        <label for="fuel3">500 L/h</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="radio" id="fuel4" name="fuel" value="4">
+                        <label for="fuel4">700 L/h</label>
+                    </div>
+                </div>
+            </div>
+            <div class="electricity-options">
+                <div class="option-title">Temperatura:</div>
+                <div class="option-container">
+                    <div class="option-item">
+                        <input type="radio" id="temp1" name="temp" value="1">
+                        <label for="temp1">75 °C</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="radio" id="temp2" name="temp" value="2">
+                        <label for="temp2">80 °C</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="radio" id="temp3" name="temp" value="3">
+                        <label for="temp3">85 °C</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="radio" id="temp4" name="temp" value="4">
+                        <label for="temp4">90 °C</label>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <button class="system-code-btn" onclick="backToSystem()">↲ ATRÁS</button>
+                <button id="system-security-check-btn" class="system-code-btn" onclick="systemSecurityCheck()">⏻ ACTIVAR</button>
+            </div>
+        </div>        
     `,
     
     systemSecurity: `
         <div class="system-slider-container">
-            <h3>Sistema de seguridad - Cercas Eléctricas</h3>
+            <h3>Sistema de Seguridad - Cercas Eléctricas</h3>
             <p>Ajustes de cada sector:</p>
            
             <div class="slider-sectors">
@@ -332,7 +406,7 @@ function updateElectricityVisual() {
 
 function updateSecurityVisual() {
     const securityImg = document.querySelector('#visual-system-security img');
-    if (gameState.challenges.fences.completed) {
+    if (gameState.challenges.security.completed) {
         securityImg.src = 'images/security-visual-completed.png';
     } else {
         securityImg.src = 'images/security-visual-incomplete.png';
@@ -516,6 +590,16 @@ function backToSystem() {
     showSystemVisual('systemDefault');
 }
 
+// RETO 2: reactivar el generador
+function systemElectricityCheck() {
+
+}
+
+// RETO 2: conservar los valores
+function applySecurityState() {
+
+}
+
 // RETO 3: reactivar las cercas eléctricas
 function systemSecurityCheck() {
     const sliders = document.querySelectorAll('.slider');
@@ -532,6 +616,8 @@ function systemSecurityCheck() {
         // Desactivar los botones
         const sliders = document.querySelectorAll('.slider');
         sliders.forEach(sld => { sld.disabled = true; });
+
+        updateSecurityVisual();
 
         checkButton.disabled = true;
         checkButton.classList.add('correct');
