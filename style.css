@@ -470,6 +470,7 @@ input[type="text"] {
 }
 
 input[type="text"]:focus { outline: none; }
+input[type="text"]:disabled { color: #8b8b8b; }
 
 .electricity-options {
     display: flex;
@@ -542,12 +543,19 @@ input[type="radio"]:before {
     border-color: white;
 }
 
+input[type="radio"]:disabled:checked  {
+    background-color: #8b8b8b;
+    cursor: not-allowed;
+}
 
+input[type="radio"]:disabled{
+    background-color: white;
+    cursor: not-allowed;
+}
 
-
-
-
-
+#system-electricity-check-btn { transition: all 0.2s; }
+#system-electricity-check-btn.incorrect { background-color: #bb6868; }
+#system-electricity-check-btn.correct { background-color: #75ba67; }
 
 /* RETO 3: contenedor del panel de seguridad */
 .system-slider-container {

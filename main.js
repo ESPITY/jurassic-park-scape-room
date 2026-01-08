@@ -2,8 +2,8 @@
 const gameState = {
     challenges: {
         access: { status: 'active', completed: false, solution: {code: "6015"}, answer: {code: ''}},
-        electricity: { status: 'locked', completed: false, solution: {code: "223"} },
-        security: { status: 'locked', completed: false, solution: {code: "1111"}, answer: {code: ''} },
+        electricity: { status: 'locked', completed: false, solution: {code: "333-L", param:"223"} },
+        security: { status: 'locked', completed: false, solution: {code: "5427"}, answer: {code: ''} },
         bridge: { status: 'locked', completed: false, solution: {} },
         helicopter: { status: 'locked', completed: false, solution: {} }
     },
@@ -39,7 +39,7 @@ const gameState = {
                         <li><b>Longitud:</b> 13m</li>
                         <li><b>Peso:</b> 9t</li>
                         <li><b>Alimentación:</b> carnívoro</li>
-                        <li><b>Cerca:</b> </li>
+                        <li><b>Cerca:</b> 20 kV</li>
                     </ul>
                     <img src="images/tyrannosaurus-rex.jpg" alt="Tyrannosaurus Rex">
                     <br><br>
@@ -52,7 +52,7 @@ const gameState = {
                         <li><b>Longitud:</b> 1,8m</li>
                         <li><b>Peso:</b> 15kg</li>
                         <li><b>Alimentación:</b> carnívoro</li>
-                        <li><b>Cerca:</b> </li>
+                        <li><b>Cerca: </b> 5 kV</li>
                     </ul>
                     <img src="images/velociraptor.jpg" alt="velociraptor">
                     <br><br>
@@ -65,7 +65,7 @@ const gameState = {
                         <li><b>Longitud:</b> 9m</li>
                         <li><b>Peso:</b> 6t</li>
                         <li><b>Alimentación:</b> hervíboro</li>
-                        <li><b>Cerca:</b> </li>
+                        <li><b>Cerca:</b> 15 kV</li>
                     </ul>
                     <img src="images/triceratops.jpg" alt="Triceratops">
                     <br><br>
@@ -78,7 +78,7 @@ const gameState = {
                         <li><b>Longitud:</b> 26m</li>
                         <li><b>Peso:</b> 50t</li>
                         <li><b>Alimentación:</b> hervíboro</li>
-                        <li><b>Cerca:</b> </li>
+                        <li><b>Cerca:</b> 30 kV</li>
                     </ul> 
                     <img src="images/brachiosaurus.jpg" alt="Brachiosaurus Altithorax">
                 </div>
@@ -94,28 +94,37 @@ const gameState = {
                     <ul>
                         <li>405-C: introduzca los siguientes parámetros:</li>
                             <ul>
-                            <li>Presión: 300 PSI</li>
-                            <li>Combustible: 200 L/h</li>
-                            <li>Temperatura: 85 °C</li>
+                                <li>Presión: 300 PSI</li>
+                                <li>Combustible: 200 L/h</li>
+                                <li>Temperatura: 85 °C</li>
                             </ul>
                         <li>66-T: introduzca los siguientes parámetros:</li>
                             <ul>
-                            <li>Presión: 120 PSI</li>
-                            <li>Combustible: 500 L/h</li>
-                            <li>Temperatura: 90 °C</li>
+                                <li>Presión: 120 PSI</li>
+                                <li>Combustible: 500 L/h</li>
+                                <li>Temperatura: 90 °C</li>
                             </ul>
                         <li>333-L: introduzca los siguientes parámetros:</li>
                             <ul>
-                            <li>Presión: 120 PSI</li>
-                            <li>Combustible: 380 L/h</li>
-                            <li>Temperatura: 85 °C</li>
+                                <li>Presión: 120 PSI</li>
+                                <li>Combustible: 380 L/h</li>
+                                <li>Temperatura: 85 °C</li>
                             </ul>
                         <li>781-E: introduzca los siguientes parámetros:</li>
                             <ul>
-                            <li>Presión: 50 PSI</li>
-                            <li>Combustible: 500 L/h</li>
-                            <li>Temperatura: 75 °C</li>
+                                <li>Presión: 50 PSI</li>
+                                <li>Combustible: 500 L/h</li>
+                                <li>Temperatura: 75 °C</li>
                             </ul>
+                    </ul>
+                    <br>
+                    <h4>Cercas Eléctricas</h4>
+                    <p>Las cercas de cada sector tienen distinto voltaje dependiendo de su dinosaurio:</p>
+                    <ul>
+                        <li>Sector A: Tyrannosaurus Rex</li>
+                        <li>Sector B: Triceratops</li>
+                        <li>Sector C: Velociraptor</li>
+                        <li>Sector D: Brachiosaurus Altithorax</li>
                     </ul>
                 </div>
 
@@ -205,7 +214,7 @@ const tabContents = {
     
     systemElectricity: `
         <div class="system-electricity-container">
-            <h3>Sistema Eléctrico - Generador</h3>
+            <h3>Sistema Eléctrico - Generadores</h3>
             <p>Ajustes del generador:</p>
             <div>
                 <label for="code"><b>Código:</b></label>
@@ -276,7 +285,7 @@ const tabContents = {
             </div>
             <div>
                 <button class="system-code-btn" onclick="backToSystem()">↲ ATRÁS</button>
-                <button id="system-security-check-btn" class="system-code-btn" onclick="systemSecurityCheck()">⏻ ACTIVAR</button>
+                <button id="system-electricity-check-btn" class="system-code-btn" onclick="systemElectricityCheck()">⏻ ARRANCAR</button>
             </div>
         </div>        
     `,
@@ -613,6 +622,7 @@ function openSystem(systemId) {
         document.getElementById('tab-content').innerHTML = tabContents[systemId];
         all.forEach(el => el.style.cursor = '');
         if (gameState.challenges.security.completed) applySecurityState();
+        if (gameState.challenges.electricity.completed) applyElectricityState();
     }, 500);
 
     showSystemVisual(systemId);
@@ -626,12 +636,97 @@ function backToSystem() {
 
 // RETO 2: reactivar el generador
 function systemElectricityCheck() {
+    const codeInput = document.querySelector('.system-electricity-code');
+    const pressureRadios = document.querySelectorAll('input[name="pressure"]');
+    const fuelRadios = document.querySelectorAll('input[name="fuel"]');
+    const tempRadios = document.querySelectorAll('input[name="temp"]');
+    
+    // Obtener valores
+    const code = codeInput.value.trim();
+    const pressureValue = Array.from(pressureRadios).find(r => r.checked)?.value || "";
+    const fuelValue = Array.from(fuelRadios).find(r => r.checked)?.value || "";
+    const tempValue = Array.from(tempRadios).find(r => r.checked)?.value || "";
 
+    const params = pressureValue + fuelValue + tempValue;
+
+    gameState.challenges.electricity.answer = {
+        code: code,
+        param: params
+    };
+
+    const checkButton = document.getElementById('system-electricity-check-btn');
+    
+    if (code === gameState.challenges.electricity.solution.code && 
+        params === gameState.challenges.electricity.solution.param) {
+        
+        gameState.challenges.electricity.completed = true;
+        
+        codeInput.disabled = true;
+        pressureRadios.forEach(r => r.disabled = true);
+        fuelRadios.forEach(r => r.disabled = true);
+        tempRadios.forEach(r => r.disabled = true);
+        
+        updateElectricityVisual();
+        
+        checkButton.disabled = true;
+        checkButton.classList.add('correct');
+        
+    } else {
+        checkButton.classList.add('incorrect');
+        setTimeout(() => { checkButton.classList.remove('incorrect'); }, 500);
+    }
 }
 
-// RETO 2: conservar los valores
-function applySecurityState() {
+// RETO 2: conservar los valores los inputs, radio buttons deshabilitados y botón activar verde
+function applyElectricityState() {
+    const codeInput = document.querySelector('.system-electricity-code');
+    const pressureRadios = document.querySelectorAll('input[name="pressure"]');
+    const fuelRadios = document.querySelectorAll('input[name="fuel"]');
+    const tempRadios = document.querySelectorAll('input[name="temp"]');
+    const checkButton = document.getElementById('system-electricity-check-btn');
+    
+    codeInput.value = gameState.challenges.electricity.answer.code;
 
+    const params = gameState.challenges.electricity.answer.param;
+    
+    for (let i = 0; i < params.length; i++) {
+        const value = params[i];
+        
+        if (i === 0) {
+            // params[0] -> presión
+            for (const radio of pressureRadios) {
+                if (radio.value === value) {
+                    radio.checked = true;
+                    break;
+                }
+            }
+        } else if (i === 1) {
+            // params[1] -> combustible
+            for (const radio of fuelRadios) {
+                if (radio.value === value) {
+                    radio.checked = true;
+                    break;
+                }
+            }
+        } else if (i === 2) {
+            // params[2] -> temperatura
+            for (const radio of tempRadios) {
+                if (radio.value === value) {
+                    radio.checked = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (gameState.challenges.electricity.completed) {
+        codeInput.disabled = true;
+        pressureRadios.forEach(radio => radio.disabled = true);
+        fuelRadios.forEach(radio => radio.disabled = true);
+        tempRadios.forEach(radio => radio.disabled = true);
+        checkButton.disabled = true;
+        checkButton.classList.add('correct');
+    }
 }
 
 // RETO 3: reactivar las cercas eléctricas
