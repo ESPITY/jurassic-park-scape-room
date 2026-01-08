@@ -895,7 +895,6 @@ body *::-webkit-scrollbar-corner {
     display: flex;
     flex-direction: column;
     background-color: #c0c0c0;
-    color: white;
     font-family: 'Courier New', monospace;
     font-size: 0.9em;
     overflow: hidden;
@@ -916,7 +915,6 @@ body *::-webkit-scrollbar-corner {
 }
 
 .terminal-title {
-    color: black;
     font-weight: bold;
     letter-spacing: 1px;
 }
@@ -943,6 +941,7 @@ body *::-webkit-scrollbar-corner {
     background-color: #263f89;
     margin-bottom: 10px;
     min-height: 300px;
+    color: white;
 
     border-radius: 2px;
     border-width: 4px;
@@ -987,7 +986,7 @@ body *::-webkit-scrollbar-corner {
 }
 
 .terminal-input .prompt {
-    color: white;
+    color: #00aaff;
     margin-right: 10px;
     font-weight: bold;
 }
@@ -996,7 +995,7 @@ body *::-webkit-scrollbar-corner {
     flex: 1;
     background-color: transparent;
     border: none;
-    color: white;
+    color: #00aaff;
     font-family: 'Courier New', monospace;
     font-size: 1em;
     outline: none;

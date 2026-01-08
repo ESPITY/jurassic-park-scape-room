@@ -207,8 +207,8 @@ const tabContents = {
                 <div id="terminal-output" class="terminal-output">
                     <div class="terminal-line">Jurassic Park, Sistema de Comunicaciones v4.0.5</div>
                     <div class="terminal-line">Escriba "help" para ver los comandos disponibles.</div>
-                    <div class="terminal-line">Conectando con el Jeep...</div>
-                    <div class="terminal-line" id="jeep-connection">Conexión establecida con JEEP-01 en Sector ${gameState.currentSector + 1}</div>
+                    <div class="terminal-line error">SYSTEM > ¡TODOS LOS SISTEMAS CAÍDOS!</div>
+                    <div class="terminal-line error">SYSTEM > Ruta del Jeep detenida.</div>
                     <div class="terminal-line prompt">> </div>
                 </div>
                 <div class="terminal-input">
@@ -910,13 +910,7 @@ function applyBridgeState() {
     }
 }
 
-
-
-
-//---------------------------------------------
-
-
-// TERMINAL: manejar tecla Enter
+// TERMINAL: tecla Enter
 function handleTerminalKey(event) {
     if (event.key === 'Enter') {
         const input = document.getElementById('terminal-input');
@@ -1019,7 +1013,7 @@ function processCommand(command) {
                     
                     // Actualizar header
                     document.getElementById('header-sector').textContent = 
-                        `Sector ${gameState.currentSector} - ${jeep.route[gameState.currentSector].name}`;
+                        `${jeep.route[gameState.currentSector].name}`;
                     
                     // Mostrar mensaje del nuevo sector
                     setTimeout(() => {
