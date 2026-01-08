@@ -3,7 +3,7 @@ const gameState = {
     challenges: {
         access: { status: 'active', completed: false, solution: {code: "6015"}, answer: {code: ''}},
         electricity: { status: 'locked', completed: false, solution: {} },
-        security: { status: 'locked', completed: false, solution: {code: "1111"} },
+        security: { status: 'locked', completed: false, solution: {code: "1111"}, answer: {code: ''} },
         bridge: { status: 'locked', completed: false, solution: {} },
         helicopter: { status: 'locked', completed: false, solution: {} }
     },
@@ -504,6 +504,7 @@ function openSystem(systemId) {
     setTimeout(() => {
         document.getElementById('tab-content').innerHTML = tabContents[systemId];
         all.forEach(el => el.style.cursor = '');
+        if (gameState.challenges.security.completed) applySecurityState();
     }, 500);
 
     showSystemVisual(systemId);
@@ -515,12 +516,13 @@ function backToSystem() {
     showSystemVisual('systemDefault');
 }
 
-// RETO 3: reavtivar las cercas eléctricas
+// RETO 3: reactivar las cercas eléctricas
 function systemSecurityCheck() {
     const sliders = document.querySelectorAll('.slider');
     let answer = "";
 
     sliders.forEach(slider => { answer += slider.value; });
+    gameState.challenges.security.answer.code = answer;
 
     checkButton = document.getElementById('system-security-check-btn');
 
@@ -537,5 +539,22 @@ function systemSecurityCheck() {
     } else {
         checkButton.classList.add('incorrect');
         setTimeout(() => { checkButton.classList.remove('incorrect'); }, 500);
+    }
+}
+
+// RETO 3: conservar los valores de los sliders, botones desabilitados y btón activar verde
+function applySecurityState() {
+    const code = gameState.challenges.security.answer.code
+    const sliders = document.querySelectorAll('.slider');
+
+    for (let i = 0; i < code.length; i++) {
+        sliders[i].value = code[i];
+    }
+    
+    if (gameState.challenges.security.completed) {
+        sliders.forEach(sld => { sld.disabled = true; });
+        checkButton = document.getElementById('system-security-check-btn');
+        checkButton.disabled = true;
+        checkButton.classList.add('correct');
     }
 }

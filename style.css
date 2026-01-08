@@ -550,6 +550,7 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong, ul, li, b, div {
 }
 
 .slider::-moz-range-thumb:hover:not(:disabled)  { background-color: #dddbdb; }
+.slider:disabled::-moz-range-thumb { cursor: not-allowed; }
 
 .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -571,6 +572,7 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong, ul, li, b, div {
 }
 
 .slider::-webkit-slider-thumb:hover:not(:disabled)  { background-color: #dddbdb; }
+.slider:disabled::-webkit-slider-thumb { cursor: not-allowed; }
 
 #system-security-check-btn { transition: all 0.2s; }
 #system-security-check-btn.incorrect { background-color: #bb6868; }
