@@ -149,7 +149,102 @@ const gameState = {
                 Un saludo,<br>
                 John Hammond, presidente<br><br>
                 P.d: Soy Tim :), no le digas a Lex que te he escrito esto.</p>
-        `}
+        `},
+        { id: 7, title: "Sistema de Comunicación", show: false, read: false,
+            text: `
+                <div class="communication-system">
+                    <h4>Comunicaciones de Emergencia</h4>
+                    <p>En caso de emergencia, el sistema de comunicación permite contactar con el helicóptero de rescate enviando una señal de socorro en código Morse.</p> 
+                    <p>La señal de socorro internacional es <strong>SOS</strong>.</p>
+                    <p>Código Morse:</p>
+                    <div class="morse-table">
+                        <div class="morse-row header">
+                            <div class="morse-cell"><strong>Letra</strong></div>
+                            <div class="morse-cell"><strong>Código</strong></div>
+                            <div class="morse-cell"><strong>Letra</strong></div>
+                            <div class="morse-cell"><strong>Código</strong></div>
+                        </div>
+                        <div class="morse-row">
+                            <div class="morse-cell">A</div>
+                            <div class="morse-cell">.-</div>
+                            <div class="morse-cell">N</div>
+                            <div class="morse-cell">-.</div>
+                        </div>
+                        <div class="morse-row">
+                            <div class="morse-cell">B</div>
+                            <div class="morse-cell">-...</div>
+                            <div class="morse-cell">O</div>
+                            <div class="morse-cell">---</div>
+                        </div>
+                        <div class="morse-row">
+                            <div class="morse-cell">C</div>
+                            <div class="morse-cell">-.-.</div>
+                            <div class="morse-cell">P</div>
+                            <div class="morse-cell">.--.</div>
+                        </div>
+                        <div class="morse-row">
+                            <div class="morse-cell">D</div>
+                            <div class="morse-cell">-..</div>
+                            <div class="morse-cell">Q</div>
+                            <div class="morse-cell">--.-</div>
+                        </div>
+                        <div class="morse-row">
+                            <div class="morse-cell">E</div>
+                            <div class="morse-cell">.</div>
+                            <div class="morse-cell">R</div>
+                            <div class="morse-cell">.-.</div>
+                        </div>
+                        <div class="morse-row">
+                            <div class="morse-cell">F</div>
+                            <div class="morse-cell">..-.</div>
+                            <div class="morse-cell">S</div>
+                            <div class="morse-cell">...</div>
+                        </div>
+                        <div class="morse-row">
+                            <div class="morse-cell">G</div>
+                            <div class="morse-cell">--.</div>
+                            <div class="morse-cell">T</div>
+                            <div class="morse-cell">-</div>
+                        </div>
+                        <div class="morse-row">
+                            <div class="morse-cell">H</div>
+                            <div class="morse-cell">....</div>
+                            <div class="morse-cell">U</div>
+                            <div class="morse-cell">..-</div>
+                        </div>
+                        <div class="morse-row">
+                            <div class="morse-cell">I</div>
+                            <div class="morse-cell">..</div>
+                            <div class="morse-cell">V</div>
+                            <div class="morse-cell">...-</div>
+                        </div>
+                        <div class="morse-row">
+                            <div class="morse-cell">J</div>
+                            <div class="morse-cell">.---</div>
+                            <div class="morse-cell">W</div>
+                            <div class="morse-cell">.--</div>
+                        </div>
+                        <div class="morse-row">
+                            <div class="morse-cell">K</div>
+                            <div class="morse-cell">-.-</div>
+                            <div class="morse-cell">X</div>
+                            <div class="morse-cell">-..-</div>
+                        </div>
+                        <div class="morse-row">
+                            <div class="morse-cell">L</div>
+                            <div class="morse-cell">.-..</div>
+                            <div class="morse-cell">Y</div>
+                            <div class="morse-cell">-.--</div>
+                        </div>
+                        <div class="morse-row">
+                            <div class="morse-cell">M</div>
+                            <div class="morse-cell">--</div>
+                            <div class="morse-cell">Z</div>
+                            <div class="morse-cell">--..</div>
+                        </div>
+                    </div>
+                </div>
+        `},
     ],
     jeep: {
         sector: 0,
@@ -918,10 +1013,8 @@ function showButtonGrid() {
             square.className = 'bridge-button-grid-square';
             
             // Coordenada
-            const coord = "" + row + col;
-            
+            const coord = "" + row + col; 
             square.dataset.coord = coord;
-            square.textContent = coord;
             
             square.addEventListener('click', () => {
                 toggleChessSquare(square);
@@ -960,6 +1053,7 @@ function systemBridgeCheck() {
 
     if (isCorrect) {
         gameState.challenges.bridge.completed = true;
+        gameState.documents.find(d => d.id === 7).show = true;
 
         const buttons = document.querySelectorAll('.bridge-button-grid-square');
         buttons.forEach(btn => { btn.classList.add('disabled'); });
