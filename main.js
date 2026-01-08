@@ -1,11 +1,11 @@
 // ========== status GLOBAL DEL JUEGO ==========
 const gameState = {
     challenges: {
-        access: { status: 'active', completed: false, solution: {code: "6015"}, answer: {code: ''}},
+        access: { status: 'locked', completed: false, solution: {code: "6015"}, answer: {code: ''}},
         electricity: { status: 'locked', completed: false, solution: {code: "333-L", param:"223"} },
         security: { status: 'locked', completed: false, solution: {code: "5427"}, answer: {code: ''} },
         bridge: { status: 'locked', completed: false, solution: { code:['00', '11', '22', '33', '44', '04', '13', '31', '40']}, answer: {code: []}},
-        helicopter: { status: 'locked', completed: false, solution: {} }
+        helicopter: { status: 'locked', completed: false, solution: {code: "...---..."}, answer: { code: '' } }
     },
     documents: [
         { id: 1, title: "Protocolo de emergencia y evacuación", show: true, read: false,
@@ -180,16 +180,16 @@ const gameState = {
             ],
             move: [
                 "Ya estamos en el punto de partida. Usa 'move' para avanzar al siguiente sector.",
-                "Avanzando al Sector B - Triceratops...",
-                "Avanzando al Sector C - Velociraptor (¡extrema precaución!)...",
-                "Avanzando al Sector D - Brachiosaurus...",
-                "Avanzando al Puente de Escape...",
+                "Avanzando al Sector 1 - Triceratops...",
+                "Avanzando al Sector 2 - Velociraptor (¡extrema precaución!)...",
+                "Avanzando al Sector 3 - Brachiosaurus...",
+                "Avanzando al Sector 4 ",
                 "¡Hemos llegado al punto final! El helicóptero puede aterrizar aquí."
             ],
-            helicoptero: [
-                "El helicóptero necesita una señal en código Morse y una confirmación en binario.",
-                "Frecuencia de rescate: 121.5 MHz. Mensaje recibido: ... --- ... (SOS)",
-                "Responder con: 'EN RUTA' en código binario (8-bits por carácter)."
+            helicopter: [
+                "El helicóptero necesita señal de confirmación en código Morse.",
+                "Envía el código SOS para solicitar el rescate.",
+                "Comando: echo helicopter ...---..."
             ]
         },
         terminalHistory: null,
@@ -955,97 +955,90 @@ function processCommand(command) {
     // Procesar comando
     let response = '';
     
-    switch(command) {
-        case 'help':
-            response = `<div class="terminal-line" style="white-space: pre">
-- <strong>echo [arg]</strong>           Enviar un mensaje
-   <strong>jeep status</strong>            Estado actual del Jeep
-   <strong>jeep explore</strong>           La gente del Jeep examina el área
-   <strong>jeep hint</strong>              Pedir una pista a la gente del Jeep
-- <strong>cd nextSector</strong>        El Jeep avanza al siguiente sector
-- <strong>helicoptero</strong>          Comunicarse con rescate aéreo
-- <strong>clear</strong>                Limpiar el terminal</div>`;
-            break;
-            
-        case 'echo jeep status':
-            response = getJeepResponse(sector, 'status');
-            break;
-            
-        case 'echo jeep explore':
-            response = getJeepResponse(sector, 'explore');
-            break;
-        
-        case 'echo jeep hint':
-            // Pistas adicionales según retos completados
-            if (sector === 1 && !gameState.challenges.electricity.completed) {
-                response += `<div class="terminal-line hint">Pista: Consulta el "Manual de sistemas" en Documentos para los parámetros del código 333-L</div>`;
-            }
-            if (sector === 2 && !gameState.challenges.security.completed) {
-                response += `<div class="terminal-line hint">Pista: Cada sector necesita su voltaje específico. Consulta la guía paleontológica.</div>`;
-            }
-            if (sector === 3) {
-                response += `<div class="terminal-line hint">Pista: El patrón en el suelo muestra coordenadas: 00, 11, 22, 33, 44...</div>`;
-            }
-            break;
-            
-        case 'move':
-            if (sector < jeep.route.length - 1) {
-                // Verificar si puede avanzar (retos previos completados)
-                let canMove = true;
-                let requirement = '';
+    if (command.startsWith('echo helicopter')) {
+        response = processHelicopterCommand(command);
+    } else {
+        switch(command) {
+            case 'help':
+                response = `<div class="terminal-line" style="white-space: pre">
+- <strong>echo [receptor]</strong>           Enviar un mensaje
+  <strong>jeep status</strong>                 Estado actual del Jeep
+  <strong>jeep explore</strong>                La gente del Jeep examina el área
+  <strong>jeep hint</strong>                   Pedir una pista a la gente del Jeep
+  <strong>helicopter [codigo]</strong>         Comunicarse con rescate aéreo
+- <strong>cd sector</strong>             El Jeep avanza al siguiente sector
+- <strong>clear</strong>                     Limpiar el terminal</div>`;
+                break;
                 
-                if (sector === 0 && !gameState.challenges.access.completed) {
-                    canMove = false;
-                    requirement = 'Necesitas acceder a los sistemas primero.';
-                }
+            case 'echo jeep status':
+                response = getJeepResponse(sector, 'status');
+                break;
+                
+            case 'echo jeep explore':
+                response = getJeepResponse(sector, 'explore');
+                break;
+            
+            case 'echo jeep hint':
+                // Pistas adicionales según retos completados
                 if (sector === 1 && !gameState.challenges.electricity.completed) {
-                    canMove = false;
-                    requirement = 'El Jeep no tiene electricidad.';
+                    response += `<div class="terminal-line hint">Pista: Consulta el "Manual de sistemas" en Documentos para los parámetros del código 333-L</div>`;
                 }
                 if (sector === 2 && !gameState.challenges.security.completed) {
-                    canMove = false;
-                    requirement = 'El Jeep está rodeado de dinosaurios.';
+                    response += `<div class="terminal-line hint">Pista: Cada sector necesita su voltaje específico. Consulta la guía paleontológica.</div>`;
                 }
-                if (sector === 4 && !gameState.challenges.bridge.completed) {
-                    canMove = false;
-                    requirement = 'El puente levadizo no está bajado.';
+                if (sector === 3) {
+                    response += `<div class="terminal-line hint">Pista: El patrón en el suelo muestra coordenadas: 00, 11, 22, 33, 44...</div>`;
                 }
+                break;
                 
-                if (canMove) {
-                    gameState.currentSector++;
-                    response = `<div class="terminal-line">${jeep.messages.move[sector]}</div>`;
+            case 'cd sector':
+                if (sector < jeep.route.length - 1) {
+                    // Verificar si puede avanzar (retos previos completados)
+                    let canMove = true;
+                    let requirement = '';
                     
-                    showCommunicationVisual();
+                    if (sector === 0 && !gameState.challenges.access.completed) {
+                        canMove = false;
+                        requirement = 'Necesitas acceder a los sistemas primero.';
+                    }
+                    if (sector === 1 && !gameState.challenges.electricity.completed) {
+                        canMove = false;
+                        requirement = 'El Jeep no tiene electricidad.';
+                    }
+                    if (sector === 2 && !gameState.challenges.security.completed) {
+                        canMove = false;
+                        requirement = 'El Jeep está rodeado de dinosaurios.';
+                    }
+                    if (sector === 4 && !gameState.challenges.bridge.completed) {
+                        canMove = false;
+                        requirement = 'El puente levadizo no está bajado.';
+                    }
                     
-                    document.getElementById('header-sector').textContent = 
-                        `${jeep.route[gameState.currentSector].name}`;
+                    if (canMove) {
+                        gameState.currentSector++;
+                        response = `<div class="terminal-line">${jeep.messages.move[sector]}</div>`;
+                        
+                        showCommunicationVisual();
+                        
+                        document.getElementById('header-sector').textContent = 
+                            `${jeep.route[gameState.currentSector].name}`;
+                    } else {
+                        response = `<div class="terminal-line error">No puedes avanzar. ${requirement}</div>`;
+                    }
                 } else {
-                    response = `<div class="terminal-line error">No puedes avanzar. ${requirement}</div>`;
+                    response = `<div class="terminal-line">Ya estás en el sector final. Usa 'helicoptero' para contactar rescate.</div>`;
                 }
-            } else {
-                response = `<div class="terminal-line">Ya estás en el sector final. Usa 'helicoptero' para contactar rescate.</div>`;
-            }
-            break;
-            
-        case 'helicopter':
-            if (gameState.challenges.bridge.completed) {
-                response = `<div class="terminal-line">${jeep.messages.helicoptero[0]}</div>
-                           <div class="terminal-line">${jeep.messages.helicoptero[1]}</div>
-                           <div class="terminal-line">${jeep.messages.helicoptero[2]}</div>
-                           <div class="terminal-line hint">(Usa la pestaña Comunicaciones para responder)</div>`;
-            } else {
-                response = `<div class="terminal-line error">El puente no está bajado. No hay lugar para que aterrice el helicóptero.</div>`;
-            }
-            break;
-            
-        case 'clear':
-            clearTerminal();
-            return;
-            break;
-            
-        default:
-            response = `<div class="terminal-line error">Comando no reconocido: "${command}"</div>
-                       <div class="terminal-line">Escribe "ayuda" para ver comandos disponibles.</div>`;
+                break;
+                
+            case 'clear':
+                clearTerminal();
+                return;
+                break;
+                
+            default:
+                response = `<div class="terminal-line error">Comando no reconocido: "${command}"</div>
+                        <div class="terminal-line">Escribe "ayuda" para ver comandos disponibles.</div>`;
+        }
     }
     
     output.innerHTML += response;
@@ -1077,14 +1070,6 @@ function getJeepResponse(sector, messageType) {
 function scrollTerminal() {
     const output = document.getElementById('terminal-output');
     output.scrollTop = output.scrollHeight;
-}
-
-// TERMINAL: limpiar
-function clearTerminal() {
-    const output = document.getElementById('terminal-output');
-    output.innerHTML = `<div class="terminal-line">Jurassic Park, Sistema de Comunicaciones v4.0.5</div>
-                       <div class="terminal-line">Escriba "help" para ver los comandos disponibles.</div>
-                       <div class="terminal-line prompt">> </div>`;
 }
 
 // TERMINAL: limpiar
@@ -1139,4 +1124,40 @@ function removeEndEmptyPrompt(outputElement) {
             outputElement.removeChild(lastLine);
         }
     }
+}
+
+// RETO 5: helicóptero
+function processHelicopterCommand(command) {
+    let response = '';
+
+    // Caso 1: comando con código
+    if (command.startsWith('echo helicopter ')) {
+        const morsePart = command.substring('echo helicopter '.length).trim();
+        
+        if (!gameState.challenges.bridge.completed) {
+            response = `<div class="terminal-line error">Señal insuficiente. Mueva el Jeep al helipuerto.</div>`;
+        } else if (morsePart === "...---...") {
+            gameState.challenges.helicopter.answer.code = morsePart;
+            
+            if (morsePart === gameState.challenges.helicopter.solution.code) {
+                gameState.challenges.helicopter.completed = true;
+                response = `<div class="terminal-line success">El helicóptero ha recibido tu llamada y está en camino.
+                ¡Has rescatado a la gente del Jeep!</div>`
+                
+                setTimeout(() => {
+                    alert('¡RESCATE CONFIRMADO! El helicóptero está en camino. ¡Has salvado al equipo!');
+                }, 500);
+            }
+        } else {
+            response = `<div class="terminal-line error">Código Morse incorrecto. Usa: echo helicopter ...---...</div>
+                       <div class="terminal-line hint">Recuerda: SOS en morse es 3 puntos, 3 rayas, 3 puntos.</div>`;
+        }
+    }
+    // Caso 3: Comando sin código
+    else {
+        response = `<div class="terminal-line error">Comando no reconocido: "${command}"</div>
+                    <div class="terminal-line">Escribe "ayuda" para ver comandos disponibles.</div>`;
+    }
+    
+    return response;
 }

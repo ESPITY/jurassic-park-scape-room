@@ -764,131 +764,6 @@ input[type="radio"]:disabled{
 #system-bridge-check-btn.incorrect { background-color: #bb6868; }
 #system-bridge-check-btn.correct { background-color: #75ba67; }
 
-
-
-
-
-/* -----------------*/
-
-/* PANEL DE CÓDIGO */
-.code-editor {
-    width: 100%;
-    height: 200px;
-    background: #000;
-    color: #0f0;
-    font-family: 'Courier New', monospace;
-    border: 1px solid #333;
-    padding: 10px;
-    resize: vertical;
-}
-
-
-
-/* INDICADORES DE PROGRESO EN EL MAPA */
-.progress-indicator {
-    position: absolute;
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    z-index: 100;
-}
-
-.solved { background: #0f0; }
-.in-progress { background: #ff0; animation: pulse 2s infinite; }
-.locked { background: #f00; }
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* SCROLLBAR: https://gist.github.com/Dakedres/0ccda599648833a1c2f65d3967aa131b */
-body *::-webkit-scrollbar {
-  width: 16px;
-  height: 16px;
-  background: none;
-}
-
-body *::-webkit-scrollbar-thumb, body *::-webkit-scrollbar-button {
-  width: 16px;
-  height: 16px;
-  background: silver;
-  box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px gray;
-  border: 1px solid;
-  border-color: silver #000 #000 silver;
-}
-
-body *::-webkit-scrollbar-track {
-  image-rendering: optimizeSpeed;
-  image-rendering: pixelated;
-  image-rendering: optimize-contrast;
-  background-image: url("images/scrollbar-track-background.svg");
-  background-position: 0 0;
-  background-repeat: repeat;
-  background-size: 8px;
-}
-
-body *::-webkit-scrollbar-button {
-  background-repeat: no-repeat;
-  background-size: 16px;
-}
-
-body *::-webkit-scrollbar-button:single-button:vertical:decrement {
-  background-image: url("images/arrow-up.svg");
-}
-
-body *::-webkit-scrollbar-button:single-button:vertical:increment {
-  background-image: url("images/arrow-down.svg");
-}
-
-body *::-webkit-scrollbar-button:single-button:horizontal:decrement {
-  background-image: url("images/arrow-left.svg");
-}
-
-body *::-webkit-scrollbar-button:single-button:horizontal:increment {
-  background-image: url("images/arrow-right.svg");
-}
-
-body *::-webkit-scrollbar-corner {
-  background: silver;
-}
-
-
-
-
 /* TERMINAL DE COMUNICACIONES */
 .terminal-container {
     height: 100%;
@@ -1017,3 +892,124 @@ body *::-webkit-scrollbar-corner {
     box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
 }
 
+
+
+
+
+/* -----------------*/
+
+/* PANEL DE CÓDIGO */
+.code-editor {
+    width: 100%;
+    height: 200px;
+    background: #000;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    border: 1px solid #333;
+    padding: 10px;
+    resize: vertical;
+}
+
+
+
+/* INDICADORES DE PROGRESO EN EL MAPA */
+.progress-indicator {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    z-index: 100;
+}
+
+.solved { background: #0f0; }
+.in-progress { background: #ff0; animation: pulse 2s infinite; }
+.locked { background: #f00; }
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* SCROLLBAR: https://gist.github.com/Dakedres/0ccda599648833a1c2f65d3967aa131b */
+body *::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+  background: none;
+}
+
+body *::-webkit-scrollbar-thumb, body *::-webkit-scrollbar-button {
+  width: 16px;
+  height: 16px;
+  background: silver;
+  box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px gray;
+  border: 1px solid;
+  border-color: silver #000 #000 silver;
+}
+
+body *::-webkit-scrollbar-track {
+  image-rendering: optimizeSpeed;
+  image-rendering: pixelated;
+  image-rendering: optimize-contrast;
+  background-image: url("images/scrollbar-track-background.svg");
+  background-position: 0 0;
+  background-repeat: repeat;
+  background-size: 8px;
+}
+
+body *::-webkit-scrollbar-button {
+  background-repeat: no-repeat;
+  background-size: 16px;
+}
+
+body *::-webkit-scrollbar-button:single-button:vertical:decrement {
+  background-image: url("images/arrow-up.svg");
+}
+
+body *::-webkit-scrollbar-button:single-button:vertical:increment {
+  background-image: url("images/arrow-down.svg");
+}
+
+body *::-webkit-scrollbar-button:single-button:horizontal:decrement {
+  background-image: url("images/arrow-left.svg");
+}
+
+body *::-webkit-scrollbar-button:single-button:horizontal:increment {
+  background-image: url("images/arrow-right.svg");
+}
+
+body *::-webkit-scrollbar-corner {
+  background: silver;
+}
