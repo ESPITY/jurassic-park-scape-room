@@ -1,4 +1,16 @@
-// ========== status GLOBAL DEL JUEGO ==========
+// ========== ESCAPP INTEGRATION ==========
+const ESCAPP_CONFIG = {
+    SERVER_URL: 'wss://escapp.es',
+    ESCAPE_ROOM_ID: 459,
+    // Variables de estado de conexión
+    isConnected: false,
+    socket: null,
+    userEmail: '',
+    userPassword: '',
+    puzzlesSolved: []
+};
+
+// ========== GLOBAL DEL JUEGO ==========
 const gameState = {
     challenges: {
         access: { status: 'locked', completed: false, solution: {code: "6015"}, answer: {code: ''}},
@@ -293,7 +305,6 @@ const gameState = {
         <div class="terminal-line prompt">> </div>
         `
     },
-    //currentChallenge: 0,
     currentSector: 0,
 };
 
@@ -504,7 +515,7 @@ const tabContents = {
     `,
 };
 
-// BUCLE DE JUEO: pestañas, cargar la pestaña inicial, temporizador
+// BUCLE DE JUEGO: pestañas, cargar la pestaña inicial, temporizador
 window.onload = function() {
     document.querySelectorAll('.tab').forEach(tab => {
         tab.onclick = () => changeTab(tab.dataset.tab);
@@ -517,8 +528,187 @@ window.onload = function() {
     if (terminalOutput) gameState.jeep.terminalHistory = terminalOutput.innerHTML;
 
     startTimer(60 * 60); // 60 min
+    
+    // Mostrar mensaje de bienvenida
+    setTimeout(() => {
+        addTerminalLine("Para jugar con Escapp, usa los comandos:", "system");
+        addTerminalLine("  email <email> - Establecer usuario", "system");
+        addTerminalLine("  password <contraseña> - Establecer contraseña", "system");
+        addTerminalLine("  start game - Iniciar conexión con Escapp", "system");
+        addTerminalLine("  escapp logout - Desconectar de escapp", "system");
+    }, 1000);
 };
 
+// ========== FUNCIONES ESCAPP ==========
+function escappConnect() {
+    if (!ESCAPP_CONFIG.userEmail || !ESCAPP_CONFIG.userPassword) {
+        addTerminalLine("SYSTEM> Debes configurar user y password primero", "error");
+        return false;
+    }
+    
+    addTerminalLine("SYSTEM> Conectando a Escapp...", "system");
+    
+    try {
+        ESCAPP_CONFIG.socket = io(ESCAPP_CONFIG.SERVER_URL, {
+            query: {
+                escapeRoom: ESCAPP_CONFIG.ESCAPE_ROOM_ID,
+                email: ESCAPP_CONFIG.userEmail,
+                password: ESCAPP_CONFIG.userPassword
+            },
+            transports: ['websocket']
+        });
+
+        // Eventos de conexión
+        ESCAPP_CONFIG.socket.on('connect', () => {
+            ESCAPP_CONFIG.isConnected = true;
+            addTerminalLine("SYSTEM> Te has conectado a Escapp", "success");
+            
+            // Enviar evento de inicio
+            setTimeout(() => {
+                ESCAPP_CONFIG.socket.emit('START_PLAYING');
+            }, 1000);
+        });
+
+        ESCAPP_CONFIG.socket.on('INITIAL_INFO', (data) => {
+            if (data.participation === 'PARTICIPANT') {
+                const progress = data.erState?.progress || 0;
+                addTerminalLine(`Progreso escapp: ${progress}%`, "system");
+                
+                // Sincronizar puzzles ya completados
+                if (data.erState?.puzzlesSolved) {
+                    ESCAPP_CONFIG.puzzlesSolved = data.erState.puzzlesSolved;
+                    syncEscappPuzzles();
+                }
+            }
+        });
+
+        ESCAPP_CONFIG.socket.on('PUZZLE_RESPONSE', (data) => {
+            //
+        });
+
+        ESCAPP_CONFIG.socket.on('HINT_RESPONSE', (data) => {
+            addTerminalLine(`PISTA> ${data.msg}`, "hint");
+        });
+
+        ESCAPP_CONFIG.socket.on('MESSAGE', (data) => {
+            addTerminalLine(`MENSAJE> ${data.msg}`, "system");
+        });
+
+        ESCAPP_CONFIG.socket.on('connect_error', (error) => {
+            addTerminalLine(`SYSTEM> Error de conexión: ${error.message}`, "error");
+            ESCAPP_CONFIG.isConnected = false;
+        });
+
+        ESCAPP_CONFIG.socket.on('disconnect', (reason) => {
+            addTerminalLine(`SYSTEM> Desconectado: ${reason}`, "system");
+            ESCAPP_CONFIG.isConnected = false;
+        });
+
+        return true;
+    } catch (error) {
+        addTerminalLine(`SYSTEM> Error al conectar: ${error.message}`, "error");
+        return false;
+    }
+}
+
+function escappDisconnect() {
+    if (ESCAPP_CONFIG.socket) {
+        ESCAPP_CONFIG.socket.disconnect();
+        ESCAPP_CONFIG.socket = null;
+    }
+    ESCAPP_CONFIG.isConnected = false;
+    addTerminalLine("Desconectado de escapp.es", "system");
+}
+
+function sendPuzzleSolution(puzzleOrder, solution) {
+    if (!ESCAPP_CONFIG.isConnected || !ESCAPP_CONFIG.socket) {
+        return;
+    }
+    
+    ESCAPP_CONFIG.socket.emit('SOLVE_PUZZLE', {
+        puzzleOrder: puzzleOrder,
+        sol: solution.toString()
+    });
+}
+
+function requestHint(puzzleOrder) {
+    if (!ESCAPP_CONFIG.isConnected || !ESCAPP_CONFIG.socket) {
+        addTerminalLine("SYSTEM> No estás conectado a escapp. Usa 'start game' primero.", "error");
+        return;
+    }
+    
+    const puzzleNumber = parseInt(puzzleOrder);
+    if (isNaN(puzzleNumber) || puzzleNumber < 1 || puzzleNumber > 5) {
+        addTerminalLine("SYSTEM>  Número de puzzle inválido (1-5)", "error");
+        return;
+    }
+    
+    ESCAPP_CONFIG.socket.emit('REQUEST_HINT', {
+        status: 'in_progress',
+        score: 50,
+        category: 'puzzle_' + puzzleNumber
+    });
+}
+
+function syncEscappPuzzles() {
+    ESCAPP_CONFIG.puzzlesSolved.forEach(puzzleOrder => {
+        switch(puzzleOrder) {
+            case 1:
+                if (!gameState.challenges.access.completed) {
+                    gameState.challenges.access.completed = true;
+                    gameState.challenges.access.answer.code = gameState.challenges.access.solution.code;
+                    gameState.documents.find(d => d.id === 4).show = true;
+                    gameState.documents.find(d => d.id === 5).show = true;
+                }
+                break;
+            case 2:
+                if (!gameState.challenges.electricity.completed) {
+                    gameState.challenges.electricity.completed = true;
+                }
+                break;
+            case 3:
+                if (!gameState.challenges.security.completed) {
+                    gameState.challenges.security.completed = true;
+                    gameState.documents.find(d => d.id === 6).show = true;
+                }
+                break;
+            case 4:
+                if (!gameState.challenges.bridge.completed) {
+                    gameState.challenges.bridge.completed = true;
+                    gameState.documents.find(d => d.id === 7).show = true;
+                }
+                break;
+            case 5:
+                if (!gameState.challenges.helicopter.completed) {
+                    gameState.challenges.helicopter.completed = true;
+                }
+                break;
+        }
+    });
+    
+    // Actualizar interfaz
+    updateChecklist();
+    updateSystemUnlockedTab();
+}
+
+// Helper para añadir líneas al terminal
+function addTerminalLine(text, type = "normal") {
+    const output = document.getElementById('terminal-output');
+    if (!output) return;
+    
+    let className = "terminal-line";
+    switch(type) {
+        case "success": className += " success"; break;
+        case "error": className += " error"; break;
+        case "hint": className += " hint"; break;
+        case "system": className += " system"; break;
+    }
+    
+    output.innerHTML += `<div class="${className}">${text}</div>`;
+    scrollTerminal();
+}
+
+// ========== FUNCIONES DEL JUEGO ==========
 
 // TEMPORIZADOR
 function startTimer(timerTime) {
@@ -533,7 +723,7 @@ function startTimer(timerTime) {
         // Añadir avisos de tiempo (alertas)
         if (time <= 0) {
             clearInterval(timer);
-            alert('⏰ ¡time AGOTADO! Los dinosaurios han alcanzado el jeep.');
+            alert('¡TIEMPO AGOTADO! Los dinosaurios han alcanzado el jeep, no has conseguido rescatarlos.');
         }
     }, 1000);
 }
@@ -547,8 +737,6 @@ function changeTab(tabId) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     event.target.classList.add('active');
     
-    //document.getElementById('tab-content').innerHTML = tabContents[tabId];
-
     // Si no se ha superado el reto 1 (access) se muestra el panel (bloqueado), de lo contrario los botones del sistema (desbloqueado)
     if (tabId === 'system') {
         if (!gameState.challenges.access.completed) {
@@ -577,12 +765,6 @@ function changeVisuals(tabId) {
     switch(tabId) {
         case 'comms':
             document.getElementById('visual-comms').classList.add('active');
-
-            // if (gameState.challenges.bridge.completed) {
-            //     bridgeImg.src = 'images/bridge-down.png';
-            // } else {
-            //     bridgeImg.src = 'images/bridge-up.png';
-            // }
             break;
         case 'system':
             document.getElementById('visual-systems').classList.add('active');
@@ -671,7 +853,6 @@ function loadDocumentList() {
     gameState.documents.forEach(doc => {
         if (doc.show) {
             const div = document.createElement('div');
-            //div.className = `document ${doc.read ? '' : 'unread'}`;
             div.className = `document`;
             div.setAttribute('data-id', doc.id);    // Resaltar en showDocument()
             div.innerHTML = `
@@ -715,21 +896,12 @@ function updateChecklist() {
     for (const challengeId in gameState.challenges) {
         if (gameState.challenges[challengeId].completed) {
             const taskCheckbox = document.getElementById(challengeId);
-            taskCheckbox.textContent = '☑';
-            //taskCheckbox.classList.add('active');
+            if (taskCheckbox) {
+                taskCheckbox.textContent = '☑';
+            }
         } 
     }
 }
-
-/* RETOS: marcar el reto recibido como completado
-function challengeCompleted(challengeId) {
-    if (!gameState.challenges[challengeId].completed) {
-        gameState.challenges[challengeId].completed = true;
-        gameState.currentChallenge = challengeId;
-        
-        //updateChecklist();
-    }
-}*/
 
 // RETO 1: acceso a los sistemas
 function systemCodeAddDigit(digit) {
@@ -751,13 +923,17 @@ function systemCodeClear() {
 // RETO 1: acceso a los sistemas
 function systemCodeUpdateDisplay() {
     const display = document.getElementById('system-code');
-    display.textContent = gameState.challenges.access.answer.code.padEnd(4, '_');
+    if (display) {
+        display.textContent = gameState.challenges.access.answer.code.padEnd(4, '_');
+    }
 }
 
 function systemCodeClearDisplayColor() {
     const systemCode = document.getElementById('system-code');
-    systemCode.classList.remove('correct');
-    systemCode.classList.remove('incorrect');
+    if (systemCode) {
+        systemCode.classList.remove('correct');
+        systemCode.classList.remove('incorrect');
+    }
 }
 
 // RETO 1: acceso a los sistemas
@@ -773,14 +949,15 @@ function systemCodeCheck() {
         const buttons = document.querySelectorAll('.system-code-btn');
         buttons.forEach(btn => { btn.disabled = true; });
 
-        //challengeCompleted
-        // Actualiza la pestaña system despues de X tiempo
+        // Enviar solución a escapp
+        sendPuzzleSolution(1, gameState.challenges.access.answer.code);
+        
+        // Actualiza la pestaña system después de X tiempo
         setTimeout(() => { updateSystemUnlockedTab(); }, 500);
     } else {
         systemCode.classList.add('incorrect');
     }
 }
-
 
 // NAVEGACIÓN ENTRE SISTEMAS: abrir sistemas (delay intencional)
 function openSystem(systemId) {
@@ -788,7 +965,7 @@ function openSystem(systemId) {
     const buttonId = `system-${systemId.replace('system', '').toLowerCase()}-btn`;
     const button = document.getElementById(buttonId);
     
-    if (button.disabled) return;
+    if (button && button.disabled) return;
 
     const all = document.querySelectorAll('*');
     all.forEach(el => el.style.cursor = 'wait');
@@ -808,7 +985,7 @@ function openSystem(systemId) {
 // SISTEMAS: actualización del descbloqueo de sistemas
 function updateSystemUnlockedTab() {
     const activeTab = document.querySelector('.tab.active');
-    if (activeTab.dataset.tab === 'system' && gameState.challenges.access.completed) {
+    if (activeTab && activeTab.dataset.tab === 'system' && gameState.challenges.access.completed) {
         const electricityDisabled = gameState.currentSector < 1;
         const securityDisabled = !gameState.challenges.electricity.completed || gameState.currentSector < 2;
         const bridgeDisabled = !gameState.challenges.electricity.completed || gameState.currentSector < 3;
@@ -871,7 +1048,7 @@ function systemElectricityCheck() {
     const tempRadios = document.querySelectorAll('input[name="temp"]');
     
     // Obtener valores
-    const code = codeInput.value.trim();
+    const code = codeInput ? codeInput.value.trim() : "";
     const pressureValue = Array.from(pressureRadios).find(r => r.checked)?.value || "";
     const fuelValue = Array.from(fuelRadios).find(r => r.checked)?.value || "";
     const tempValue = Array.from(tempRadios).find(r => r.checked)?.value || "";
@@ -890,19 +1067,27 @@ function systemElectricityCheck() {
         
         gameState.challenges.electricity.completed = true;
         
-        codeInput.disabled = true;
+        if (codeInput) codeInput.disabled = true;
         pressureRadios.forEach(r => r.disabled = true);
         fuelRadios.forEach(r => r.disabled = true);
         tempRadios.forEach(r => r.disabled = true);
         
         updateElectricityVisual();
         
-        checkButton.disabled = true;
-        checkButton.classList.add('correct');
+        if (checkButton) {
+            checkButton.disabled = true;
+            checkButton.classList.add('correct');
+        }
+        
+        // Enviar solución a escapp
+        const solution = `${code}-${params}`;
+        sendPuzzleSolution(2, solution);
         
     } else {
-        checkButton.classList.add('incorrect');
-        setTimeout(() => { checkButton.classList.remove('incorrect'); }, 500);
+        if (checkButton) {
+            checkButton.classList.add('incorrect');
+            setTimeout(() => { checkButton.classList.remove('incorrect'); }, 500);
+        }
     }
 }
 
@@ -914,7 +1099,7 @@ function applyElectricityState() {
     const tempRadios = document.querySelectorAll('input[name="temp"]');
     const checkButton = document.getElementById('system-electricity-check-btn');
     
-    codeInput.value = gameState.challenges.electricity.answer.code;
+    if (codeInput) codeInput.value = gameState.challenges.electricity.answer.code;
 
     const params = gameState.challenges.electricity.answer.param;
     
@@ -949,12 +1134,14 @@ function applyElectricityState() {
     }
 
     if (gameState.challenges.electricity.completed) {
-        codeInput.disabled = true;
+        if (codeInput) codeInput.disabled = true;
         pressureRadios.forEach(radio => radio.disabled = true);
         fuelRadios.forEach(radio => radio.disabled = true);
         tempRadios.forEach(radio => radio.disabled = true);
-        checkButton.disabled = true;
-        checkButton.classList.add('correct');
+        if (checkButton) {
+            checkButton.disabled = true;
+            checkButton.classList.add('correct');
+        }
     }
 }
 
@@ -966,47 +1153,57 @@ function systemSecurityCheck() {
     sliders.forEach(slider => { answer += slider.value; });
     gameState.challenges.security.answer.code = answer;
 
-    checkButton = document.getElementById('system-security-check-btn');
+    const checkButton = document.getElementById('system-security-check-btn');
 
     if (answer === gameState.challenges.security.solution.code) {
         gameState.challenges.security.completed = true;
         gameState.documents.find(d => d.id === 6).show = true;
 
         // Desactivar los botones
-        const sliders = document.querySelectorAll('.slider');
         sliders.forEach(sld => { sld.disabled = true; });
 
         updateSecurityVisual();
 
-        checkButton.disabled = true;
-        checkButton.classList.add('correct');
+        if (checkButton) {
+            checkButton.disabled = true;
+            checkButton.classList.add('correct');
+        }
 
+        // Enviar solución a escapp
+        sendPuzzleSolution(3, answer);
+        
     } else {
-        checkButton.classList.add('incorrect');
-        setTimeout(() => { checkButton.classList.remove('incorrect'); }, 500);
+        if (checkButton) {
+            checkButton.classList.add('incorrect');
+            setTimeout(() => { checkButton.classList.remove('incorrect'); }, 500);
+        }
     }
 }
 
-// RETO 3: conservar los valores de los sliders, botones desabilitados y btón activar verde
+// RETO 3: conservar los valores de los sliders, botones desabilitados y botón activar verde
 function applySecurityState() {
-    const code = gameState.challenges.security.answer.code
+    const code = gameState.challenges.security.answer.code;
     const sliders = document.querySelectorAll('.slider');
 
-    for (let i = 0; i < code.length; i++) {
+    for (let i = 0; i < code.length && i < sliders.length; i++) {
         sliders[i].value = code[i];
     }
     
     if (gameState.challenges.security.completed) {
         sliders.forEach(sld => { sld.disabled = true; });
-        checkButton = document.getElementById('system-security-check-btn');
-        checkButton.disabled = true;
-        checkButton.classList.add('correct');
+        const checkButton = document.getElementById('system-security-check-btn');
+        if (checkButton) {
+            checkButton.disabled = true;
+            checkButton.classList.add('correct');
+        }
     }
 }
 
 // RETO 4: grid de botones para marcar un patrón
 function showButtonGrid() {
     const board = document.getElementById('bridge-button-grid');
+    if (!board) return;
+    
     board.innerHTML = '';
     
     for (let row = 0; row < 5; row++) {
@@ -1045,7 +1242,7 @@ function toggleChessSquare(square) {
 
 // RETO 4
 function systemBridgeCheck() {
-    checkButton = document.getElementById('system-bridge-check-btn');
+    const checkButton = document.getElementById('system-bridge-check-btn');
 
     const answerArray = gameState.challenges.bridge.answer.code;
     const solutionArray = gameState.challenges.bridge.solution.code;
@@ -1062,11 +1259,20 @@ function systemBridgeCheck() {
 
         updateBridgeVisual();
 
-        checkButton.disabled = true;
-        checkButton.classList.add('correct');
+        if (checkButton) {
+            checkButton.disabled = true;
+            checkButton.classList.add('correct');
+        }
+        
+        // Enviar solución a escapp
+        const solution = answerArray.join(',');
+        sendPuzzleSolution(4, solution);
+        
     } else {
-        checkButton.classList.add('incorrect');
-        setTimeout(() => { checkButton.classList.remove('incorrect'); }, 500);
+        if (checkButton) {
+            checkButton.classList.add('incorrect');
+            setTimeout(() => { checkButton.classList.remove('incorrect'); }, 500);
+        }
     }
 }
 
@@ -1084,21 +1290,81 @@ function applyBridgeState() {
         buttons.forEach(sq => { sq.classList.add('disabled'); });
         
         const checkButton = document.getElementById('system-bridge-check-btn');
-        checkButton.disabled = true;
-        checkButton.classList.add('correct');
+        if (checkButton) {
+            checkButton.disabled = true;
+            checkButton.classList.add('correct');
+        }
     }
 }
+
+// ========== TERMINAL ==========
 
 // TERMINAL: tecla Enter
 function handleTerminalKey(event) {
     if (event.key === 'Enter') {
         const input = document.getElementById('terminal-input');
-        const command = input.value.trim().toLowerCase();
+        const command = input.value.trim();
         input.value = '';
         
         if (command) {
             processCommand(command);
         }
+    }
+}
+
+// Procesar comando user
+function processUserCommand(command) {
+    const email = command.substring(5).trim();
+    
+    if (!email || !email.includes('@')) {
+        return `<div class="terminal-line error">Formato de email inválido. Ejemplo: user jugador@email.com</div>`;
+    }
+    
+    ESCAPP_CONFIG.userEmail = email;
+    return `<div class="terminal-line success">Usuario establecido: ${email}</div>`;
+}
+
+// Procesar comando password
+function processPasswordCommand(command) {
+    const password = command.substring(9).trim();
+    
+    if (!password) {
+        return `<div class="terminal-line error">Debes especificar una contraseña</div>`;
+    }
+    
+    ESCAPP_CONFIG.userPassword = password;
+    return `<div class="terminal-line success">Contraseña establecida</div>`;
+}
+
+// Procesar comandos escapp
+function processEscappCommand(command) {
+    const parts = command.split(' ');
+    const subCommand = parts[1];
+    
+    if (!subCommand) {
+        return `<div class="terminal-line error">Comando escapp incompleto. Usa: escapp status, escapp hint, escapp logout</div>`;
+    }
+    
+    switch(subCommand) {
+        case 'status':
+            let statusText = `Estado escapp: ${ESCAPP_CONFIG.isConnected ? 'CONECTADO' : 'DESCONECTADO'}<br>`;
+            statusText += `Usuario: ${ESCAPP_CONFIG.userEmail || 'No configurado'}<br>`;
+            statusText += `Puzzles resueltos: ${ESCAPP_CONFIG.puzzlesSolved.join(', ') || 'Ninguno'}`;
+            return `<div class="terminal-line">${statusText}</div>`;
+            
+        case 'hint':
+            if (parts.length < 3) {
+                return `<div class="terminal-line error">Debes especificar número de puzzle (1-5)</div>`;
+            }
+            requestHint(parts[2]);
+            return `<div class="terminal-line">Solicitando pista para puzzle ${parts[2]}...</div>`;
+            
+        case 'logout':
+            escappDisconnect();
+            return `<div class="terminal-line">Desconectando de escapp...</div>`;
+            
+        default:
+            return `<div class="terminal-line error">Comando escapp desconocido: ${subCommand}</div>`;
     }
 }
 
@@ -1118,8 +1384,14 @@ function processCommand(command) {
     
     if (command.startsWith('echo helicopter')) {
         response = processHelicopterCommand(command);
+    } else if (command.startsWith('user ')) {
+        response = processUserCommand(command);
+    } else if (command.startsWith('password ')) {
+        response = processPasswordCommand(command);
+    } else if (command.startsWith('escapp ')) {
+        response = processEscappCommand(command);
     } else {
-        switch(command) {
+        switch(command.toLowerCase()) {
             case 'help':
                 response = `<div class="terminal-line" style="white-space: pre">
 - <strong>echo [receptor]</strong>           Enviar un mensaje
@@ -1128,7 +1400,23 @@ function processCommand(command) {
   <strong>jeep hint</strong>                   Pedir una pista a la gente del Jeep
   <strong>helicopter [codigo]</strong>         Comunicarse con rescate aéreo
 - <strong>cd sector</strong>                 El Jeep avanza al siguiente sector
-- <strong>clear</strong>                     Limpiar el terminal</div>`;
+- <strong>clear</strong>                     Limpiar el terminal
+
+<strong>COMANDOS ESCAPP:</strong>
+  <strong>user &lt;email&gt;</strong>            Establecer usuario escapp
+  <strong>password &lt;contraseña&gt;</strong>  Establecer contraseña escapp
+  <strong>start game</strong>                 Iniciar conexión con escapp
+  <strong>escapp status</strong>              Ver estado de conexión
+  <strong>escapp hint &lt;número&gt;</strong>   Solicitar pista (1-5)
+  <strong>escapp logout</strong>              Desconectar de escapp</div>`;
+                break;
+                
+            case 'start game':
+                if (escappConnect()) {
+                    response = `<div class="terminal-line success">Iniciando juego en escapp...</div>`;
+                } else {
+                    response = `<div class="terminal-line error">Error al iniciar juego. Configura user y password primero.</div>`;
+                }
                 break;
                 
             case 'echo jeep status':
@@ -1178,7 +1466,10 @@ function processCommand(command) {
                         
                         showCommunicationVisual();
                         
-                        document.getElementById('header-sector').textContent = `${jeep.route[gameState.currentSector].name}`;
+                        const headerSector = document.getElementById('header-sector');
+                        if (headerSector) {
+                            headerSector.textContent = `${jeep.route[gameState.currentSector].name}`;
+                        }
                         updateSystemUnlockedTab();
                     } else {
                         response = `<div class="terminal-line error">No puedes avanzar. ${requirement}</div>`;
@@ -1191,7 +1482,6 @@ function processCommand(command) {
             case 'clear':
                 clearTerminal();
                 return;
-                break;
                 
             default:
                 response = `<div class="terminal-line error">Comando no reconocido: "${command}"</div>
@@ -1205,7 +1495,7 @@ function processCommand(command) {
     saveTerminalState();
 }
 
-// Diferentes mensajes si el rato actual ha sido completado y no se ha movido
+// Diferentes mensajes si el reto actual ha sido completado y no se ha movido
 function getJeepResponse(sector, messageType) {
     const challenges = gameState.challenges;
     const messages = gameState.jeep.messages[messageType];
@@ -1226,18 +1516,81 @@ function getJeepResponse(sector, messageType) {
     return `<div class="terminal-line">${messages[sector]}</div>`;
 }
 
+// RETO 5: helicóptero
+function processHelicopterCommand(command) {
+    let response = '';
+
+    // Caso 1: comando con código
+    if (command.startsWith('echo helicopter ')) {
+        const morsePart = command.substring('echo helicopter '.length).trim();
+        
+        if (!gameState.challenges.bridge.completed) {
+            response = `<div class="terminal-line error">Señal insuficiente. Mueva el Jeep al helipuerto.</div>`;
+        } else if (morsePart === "...---...") {
+            gameState.challenges.helicopter.answer.code = morsePart;
+            
+            if (morsePart === gameState.challenges.helicopter.solution.code) {
+                gameState.challenges.helicopter.completed = true;
+                
+                response = `<div class="terminal-line success">El helicóptero ha recibido tu llamada y está en camino.
+                ¡Has rescatado a la gente del Jeep!</div>`;
+
+                const terminalInput = document.getElementById('terminal-input');
+                if (terminalInput) {
+                    terminalInput.disabled = true;
+                    terminalInput.placeholder = "¡Helicóptero llamado!";
+                }
+                
+                // Enviar solución a escapp
+                sendPuzzleSolution(5, morsePart);
+                
+                setTimeout(() => {
+                    alert('¡RESCATE CONFIRMADO! El helicóptero está en camino. ¡Has salvado al equipo!');
+                }, 500);
+            } else {
+                response = `<div class="terminal-line error">Código morse incorrecto.</div>`;
+            }
+        } else {
+            response = `<div class="terminal-line error">Código morse incorrecto. Usa: echo helicopter ...---...</div>`;
+        }
+    } else if (command === 'echo helicopter') {
+        // Caso 2: Solo "echo helicopter" sin argumentos
+        response = `<div class="terminal-line error">Faltan argumentos al comando echo helicopter [codigo]</div>`;
+    } else {
+        // Caso 3: Comando sin código
+        response = `<div class="terminal-line error">Comando no reconocido: "${command}"</div>
+                    <div class="terminal-line">Escribe "help" para ver comandos disponibles.</div>`;
+    }
+    
+    return response;
+}
+
+// TERMINAL VISUAL MAPA
+function showCommunicationVisual() {
+    const jeepImg = document.querySelector('#visual-comms img');
+    const sector = gameState.currentSector;
+
+    if (jeepImg) {
+        jeepImg.src = `images/map-visual-${sector}.png`;
+    }
+}
+
 // TERMINAL: desplazar al final
 function scrollTerminal() {
     const output = document.getElementById('terminal-output');
-    output.scrollTop = output.scrollHeight;
+    if (output) {
+        output.scrollTop = output.scrollHeight;
+    }
 }
 
 // TERMINAL: limpiar
 function clearTerminal() {
     const output = document.getElementById('terminal-output');
     
-    output.innerHTML = gameState.jeep.terminalInitialContent;
-    scrollTerminal();
+    if (output) {
+        output.innerHTML = gameState.jeep.terminalInitialContent;
+        scrollTerminal();
+    }
     
     saveTerminalState();
 }
@@ -1282,6 +1635,8 @@ function restoreTerminalState() {
 
 // Función auxiliar para eliminar prompts vacíos del final del terminal
 function removeEndEmptyPrompt(outputElement) {
+    if (!outputElement) return;
+    
     const lines = outputElement.children;
     if (lines.length > 0) {
         const lastLine = lines[lines.length - 1];
@@ -1289,54 +1644,4 @@ function removeEndEmptyPrompt(outputElement) {
             outputElement.removeChild(lastLine);
         }
     }
-}
-
-// RETO 5: helicóptero
-function processHelicopterCommand(command) {
-    let response = '';
-
-    // Caso 1: comando con código
-    if (command.startsWith('echo helicopter ')) {
-        const morsePart = command.substring('echo helicopter '.length).trim();
-        
-        if (!gameState.challenges.bridge.completed) {
-            response = `<div class="terminal-line error">Señal insuficiente. Mueva el Jeep al helipuerto.</div>`;
-        } else if (morsePart === "...---...") {
-            gameState.challenges.helicopter.answer.code = morsePart;
-            
-            if (morsePart === gameState.challenges.helicopter.solution.code) {
-                gameState.challenges.helicopter.completed = true;
-                
-                response = `<div class="terminal-line success">El helicóptero ha recibido tu llamada y está en camino.
-                ¡Has rescatado a la gente del Jeep!</div>`
-
-                const terminalInput = document.getElementById('terminal-input');
-                terminalInput.disabled = true;
-                terminalInput.placeholder = "¡Helicóptero llamado!";
-                
-                setTimeout(() => {
-                    alert('¡RESCATE CONFIRMADO! El helicóptero está en camino. ¡Has salvado al equipo!');
-                }, 500);
-            }
-        } else {
-            response = `<div class="terminal-line error">Código morse incorrecto.</div>`;
-        }
-    } else if (command === 'echo helicopter') {
-        // Caso 2: Solo "echo helicopter" sin argumentos
-        response = `<div class="terminal-line error">Faltan argumentos al comando echo helicopter [codigo]</div>`
-    } else {
-            // Caso 3: Comando sin código
-        response = `<div class="terminal-line error">Comando no reconocido: "${command}"</div>
-                    <div class="terminal-line">Escribe "help" para ver comandos disponibles.</div>`;
-    }
-    
-    return response;
-}
-
-// TERMINAL VISUAL MAPA
-function showCommunicationVisual() {
-    const jeepImg = document.querySelector('#visual-comms img');
-    const sector = gameState.currentSector;
-
-    jeepImg.src = `images/map-visual-${sector}.png`;
 }
