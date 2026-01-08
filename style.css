@@ -517,8 +517,8 @@ input[type="text"]:disabled { color: #8b8b8b; }
 input[type="radio"] {
     background-color: white;
     appearance: none;
-    width: 17px;
-    height: 17px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -699,7 +699,7 @@ input[type="radio"]:disabled{
     text-align: center;
     height: 100%;
     width: 100%;
-    gap: 40px; 
+    gap: 20px; 
     background-color: inherit;
     background-color: #c0c0c0;
     
@@ -729,11 +729,10 @@ input[type="radio"]:disabled{
 .bridge-button-grid-square {
     width: 100%;
     height: 100%;
-    display: flex;
+    /* display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: center; */
     cursor: pointer;
-    transition: all 0.2s;
     background-color: #c0c0c0;
 
     border-radius: 2px;
@@ -743,23 +742,25 @@ input[type="radio"]:disabled{
     box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
 }
 
-
-
 .bridge-button-grid-square.selected {
     background-color: #b966af !important;
     color: white;
     border-color: #808080 #dfdfdf #dfdfdf #808080;
 }
 
-.bridge-button-grid-square:hover:not(:disabled) {
+.bridge-button-grid-square:hover:not(.disabled) {
     color: black;
     background-color: #dddbdb;
 }
 
-.bridge-button-grid-square:disabled {
+.bridge-button-grid-square.disabled {
     opacity: 0.8;
     cursor: not-allowed;    
 }
+
+#system-bridge-check-btn { transition: all 0.2s; }
+#system-bridge-check-btn.incorrect { background-color: #bb6868; }
+#system-bridge-check-btn.correct { background-color: #75ba67; }
 
 
 

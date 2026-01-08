@@ -4,7 +4,7 @@ const gameState = {
         access: { status: 'active', completed: false, solution: {code: "6015"}, answer: {code: ''}},
         electricity: { status: 'locked', completed: false, solution: {code: "333-L", param:"223"} },
         security: { status: 'locked', completed: false, solution: {code: "5427"}, answer: {code: ''} },
-        bridge: { status: 'locked', completed: false, solution: {} },
+        bridge: { status: 'locked', completed: false, solution: { code:['00', '11', '22', '33', '44', '04', '13', '31', '40']}, answer: {code: []}},
         helicopter: { status: 'locked', completed: false, solution: {} }
     },
     documents: [
@@ -143,7 +143,6 @@ const gameState = {
     ],
     currentChallenge: 0,
     currentSector: 0,
-                selectedSquares: []
 };
 
 const tabContents = {
@@ -327,8 +326,13 @@ const tabContents = {
     systemBridge: `
         <div class="system-bridge-container">
             <h3>Sistema del Puente</h3>
+            <p>Marque el patrón:</p>
             <div class="bridge-button-grid" id="bridge-button-grid">
                 <!-- Se genera dinámicamente -->
+            </div>
+            <div>
+                <button class="system-code-btn" onclick="backToSystem()">↲ ATRÁS</button>
+                <button id="system-bridge-check-btn" class="system-code-btn" onclick="systemBridgeCheck()">⏻ BAJAR</button>
             </div>
         </div>
     `,
@@ -615,9 +619,10 @@ function openSystem(systemId) {
     setTimeout(() => {
         document.getElementById('tab-content').innerHTML = tabContents[systemId];
         all.forEach(el => el.style.cursor = '');
-        if (gameState.challenges.security.completed) applySecurityState();
-        if (gameState.challenges.electricity.completed) applyElectricityState();
-        if(systemId === "systemBridge") showButtonGrid();
+        if (systemId === 'systemElectricity' && gameState.challenges.electricity.completed) applyElectricityState();
+        if (systemId === 'systemSecurity' && gameState.challenges.security.completed) applySecurityState();
+        if (systemId === "systemBridge") showButtonGrid();
+        if (systemId === 'systemBridge' && gameState.challenges.bridge.completed) applyBridgeState();
     }, 500);
 
     showSystemVisual(systemId);
@@ -769,24 +774,18 @@ function applySecurityState() {
     }
 }
 
-// RETO 4: grid de botones con dibujo
+// RETO 4: grid de botones para marcar un patrón
 function showButtonGrid() {
     const board = document.getElementById('bridge-button-grid');
     board.innerHTML = '';
     
-    // Coordenadas donde fila+columna = 5
-    const solutionSquares = [
-        'a1', 'b2', 'c3', 'd4', 'e5', 'f6', 'g7', 'h8'
-    ];
-    
-    for (let row = 5; row >= 1; row--) {
-        for (let col = 1; col <= 5; col++) {
+    for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 5; col++) {
             const square = document.createElement('div');
             square.className = 'bridge-button-grid-square';
             
-            // Coordenada en notación ajedrez
-            const colLetter = String.fromCharCode(96 + col);
-            const coord = colLetter + row;
+            // Coordenada
+            const coord = "" + row + col;
             
             square.dataset.coord = coord;
             square.textContent = coord;
@@ -800,44 +799,63 @@ function showButtonGrid() {
     }
 }
 
+// RETO 4: botones (div)
 function toggleChessSquare(square) {
+    if (square.classList.contains('disabled')) return;
+
     const coord = square.dataset.coord;
-    const index = gameState.selectedSquares.indexOf(coord);
+    const index = gameState.challenges.bridge.answer.code.indexOf(coord);
     
     if (index === -1) {
-        gameState.selectedSquares.push(coord);
+        gameState.challenges.bridge.answer.code.push(coord);
         square.classList.add('selected');
     } else {
-        gameState.selectedSquares.splice(index, 1);
+        gameState.challenges.bridge.answer.code.splice(index, 1);
         square.classList.remove('selected');
     }
 }
 
-function checkNavigation() {
-    const feedback = document.getElementById('navigationFeedback');
-    
-    // Solución: coordenadas donde fila+columna = 5
-    const correctSquares = ['a1', 'b2', 'c3', 'd4', 'e5', 'f6', 'g7', 'h8'];
-    const selected = gameState.selectedSquares;
-    
-    // Verificar que todas las seleccionadas sean correctas
-    const allCorrect = selected.every(sq => correctSquares.includes(sq));
-    // Verificar que se seleccionaron al menos 3
-    const enoughSelected = selected.length >= 3;
-    // Verificar que el decoder esté en posición múltiplo de 45
-    const decoderCorrect = gameState.decoderRotation % 45 === 0;
-    
-    if (allCorrect && enoughSelected && decoderCorrect) {
-        feedback.textContent = '✅ ¡Navegación corregida! Ruta establecida.';
-        feedback.className = 'feedback success';
-        gameState.navigationSolved = true;
-        document.getElementById('task3').classList.add('completed');
-        document.querySelector('#task3 .task-checkbox').checked = true;
+// RETO 4
+function systemBridgeCheck() {
+    checkButton = document.getElementById('system-bridge-check-btn');
+
+    const answerArray = gameState.challenges.bridge.answer.code;
+    const solutionArray = gameState.challenges.bridge.solution.code;
+    const isCorrect = answerArray.length === solutionArray.length &&
+        answerArray.every(sq => solutionArray.includes(sq)) &&
+        solutionArray.every(sq => answerArray.includes(sq));
+
+    if (isCorrect) {
+        gameState.challenges.bridge.completed = true;
+
+        const buttons = document.querySelectorAll('.bridge-button-grid-square');
+        buttons.forEach(btn => { btn.classList.add('disabled'); });
+
+        updateBridgeVisual();
+
+        checkButton.disabled = true;
+        checkButton.classList.add('correct');
     } else {
-        feedback.textContent = '❌ Selecciona casillas donde fila+columna=5 y alinea el disco';
-        feedback.className = 'feedback error';
+        checkButton.classList.add('incorrect');
+        setTimeout(() => { checkButton.classList.remove('incorrect'); }, 500);
     }
+}
+
+// RETO 4: conservar los valores del grid, botones deshabilitados y botón bajar verde
+function applyBridgeState() {    
+    const answerArray = gameState.challenges.bridge.answer.code;
+    const buttons = document.querySelectorAll('.bridge-button-grid-square');
     
-    updateProgress();
-    checkGameComplete();
+    buttons.forEach(sq => {
+        const coord = sq.dataset.coord;
+        if (answerArray.includes(coord)) sq.classList.add('selected');
+    });
+    
+    if (gameState.challenges.bridge.completed) {
+        buttons.forEach(sq => { sq.classList.add('disabled'); });
+        
+        const checkButton = document.getElementById('system-bridge-check-btn');
+        checkButton.disabled = true;
+        checkButton.classList.add('correct');
+    }
 }
