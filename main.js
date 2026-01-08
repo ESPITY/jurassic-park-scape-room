@@ -154,23 +154,23 @@ const gameState = {
     jeep: {
         sector: 0,
         route: [
-            { id: 0, name: "Centro de Control", image: "jeep-sect0.jpg", completed: true },
-            { id: 1, name: "Sector A - Tyrannosaurus", image: "jeep-sect1.jpg", completed: false },
-            { id: 2, name: "Sector B - Triceratops", image: "jeep-sect2.jpg", completed: false },
-            { id: 3, name: "Sector C - Velociraptor", image: "jeep-sect3.jpg", completed: false },
-            { id: 4, name: "Sector D - Brachiosaurus", image: "jeep-sect4.jpg", completed: false },
-            { id: 5, name: "Puente de Escape", image: "jeep-sect5.jpg", completed: false }
+            { id: 0, name: "Sector 0 - Perdidos", image: "jeep-sect0.jpg", completed: true },
+            { id: 1, name: "Sector 1 - Central Eléctrica", image: "jeep-sect1.jpg", completed: false },
+            { id: 2, name: "Sector 2 - Centro de Seguridad", image: "jeep-sect2.jpg", completed: false },
+            { id: 3, name: "Sector 2 - Centro de Seguridad", image: "jeep-sect3.jpg", completed: false },
+            { id: 4, name: "Sector 3 - Puente", image: "jeep-sect4.jpg", completed: false },
+            { id: 5, name: "Sector 4 - Helipuerto", image: "jeep-sect5.jpg", completed: false }
         ],
         messages: {
             status: [
                 "JEEP> Sector 0 - Perdidos: Sistemas caídos. Acceda a ellos para restaurarlos.",
-                "JEEP> Sector 1 - Central Eléctrica: Sistema eléctrico caíado. Activa los generadores de emergencia.",
-                "JEEP> Sector 2 - Centro de Seguridad: Sistema eléctrico caído. Activa los generadores de emergencia.",
+                "JEEP> Sector 1 - Central Eléctrica: Sistema eléctrico caído. Activa los generadores de emergencia.",
+                "JEEP> Sector 2 - Centro de Seguridad: Las cercas eléctricas están desactivadas. Debe reactivarlas",
                 "JEEP> Sector 3 - Puente: El puente levadizo se ha quedado levantado. Bájalo desde el panel de control.",
                 "JEEP> Sector 4 - Helipuerto: Llame a la torre de control para que envíen un helicóptero",
                 "JEEP> ----"
             ],
-            investigar: [
+            explore: [
                 "JEEP> 'bbbssttzzbstbs'",
                 "JEEP> 'Nos hemos acercado al panel de los generadores. Código de error visible: '333-L'. Necesita parámetros específicos.'",
                 "JEEP> '¡Estamos rodeados de dinosaurios! ¡Dése prisa y active las cercas!'",
@@ -178,8 +178,8 @@ const gameState = {
                 "JEEP> '----",
                 "JEEP> '----"
             ],
-            mover: [
-                "Ya estamos en el punto de partida. Usa 'mover' para avanzar al siguiente sector.",
+            move: [
+                "Ya estamos en el punto de partida. Usa 'move' para avanzar al siguiente sector.",
                 "Avanzando al Sector B - Triceratops...",
                 "Avanzando al Sector C - Velociraptor (¡extrema precaución!)...",
                 "Avanzando al Sector D - Brachiosaurus...",
@@ -709,7 +709,6 @@ function systemElectricityCheck() {
         params === gameState.challenges.electricity.solution.param) {
         
         gameState.challenges.electricity.completed = true;
-        gameState.documents.find(d => d.id === 6).show = true;
         
         codeInput.disabled = true;
         pressureRadios.forEach(r => r.disabled = true);
@@ -791,6 +790,7 @@ function systemSecurityCheck() {
 
     if (answer === gameState.challenges.security.solution.code) {
         gameState.challenges.security.completed = true;
+        gameState.documents.find(d => d.id === 6).show = true;
 
         // Desactivar los botones
         const sliders = document.querySelectorAll('.slider');
@@ -946,7 +946,7 @@ function processCommand(command) {
             response = `<div class="terminal-line" style="white-space: pre">
 - <strong>echo [arg]</strong>           Enviar un mensaje
    <strong>jeep status</strong>          Estado actual del Jeep
-   <strong>jeep find</strong>            La gente del Jeep examina el área
+   <strong>jeep explore</strong>            La gente del Jeep examina el área
    <strong>jeep hint</strong>            Pedir una pista a la gente del Jeep
 - <strong>cd Jeep [sector]</strong>     El Jeep avanza al siguiente sector
    <strong>1-4</strong>                  Sectores del mapa
@@ -970,9 +970,11 @@ function processCommand(command) {
             }
             break;
             
-        case 'echo jeep find':
-            response = `<div class="terminal-line">${jeep.messages.investigar[sector]}</div>`;
-            
+        case 'echo jeep explore':
+            response = `<div class="terminal-line">${jeep.messages.explore[sector]}</div>`;
+            break;
+        
+        case 'echo jeep hint':
             // Pistas adicionales según retos completados
             if (sector === 1 && !gameState.challenges.electricity.completed) {
                 response += `<div class="terminal-line hint">Pista: Consulta el "Manual de sistemas" en Documentos para los parámetros del código 333-L</div>`;
@@ -983,10 +985,6 @@ function processCommand(command) {
             if (sector === 3) {
                 response += `<div class="terminal-line hint">Pista: El patrón en el suelo muestra coordenadas: 00, 11, 22, 33, 44...</div>`;
             }
-            break;
-        
-        case 'echo jeep hint':
-
             break;
             
         case 'move':
@@ -1014,7 +1012,7 @@ function processCommand(command) {
                 
                 if (canMove) {
                     gameState.currentSector++;
-                    response = `<div class="terminal-line">${jeep.messages.mover[sector]}</div>`;
+                    response = `<div class="terminal-line">${jeep.messages.move[sector]}</div>`;
                     
                     // Actualizar visual
                     updateJeepVisual();
