@@ -139,6 +139,16 @@ const gameState = {
                 Un saludo,<br>
                 John Hammond, presidente<br><br>
                 P.d: Este año la cesta viene acompañada de un cheque regalo.</p>
+        `},
+
+        { id: 6, title: "✉ ¡¡¡Arrr!!!", show: false, read: false,
+            text: `
+                <p><i>johnhammond@jurassicpark.com</i></p><br>
+                <p>¡Me encantan los piratas! Algún día quiero ser arqueólgo y buscar fósiles como si fuesen tesoros. 
+                Es muy sencillo, solo tienes que cavar donde marca la "X".<br><br>
+                Un saludo,<br>
+                John Hammond, presidente<br><br>
+                P.d: Soy Tim :), no le digas a Lex que te he escrito esto.</p>
         `}
     ],
     currentChallenge: 0,
@@ -660,6 +670,7 @@ function systemElectricityCheck() {
         params === gameState.challenges.electricity.solution.param) {
         
         gameState.challenges.electricity.completed = true;
+        gameState.documents.find(d => d.id === 6).show = true;
         
         codeInput.disabled = true;
         pressureRadios.forEach(r => r.disabled = true);
