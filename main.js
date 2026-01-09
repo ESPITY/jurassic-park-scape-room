@@ -292,9 +292,7 @@ const gameState = {
                 "Ya estás en el helipuerto. ¡Rápido llama al helicoptero!"
             ],
             helicopter: [
-                "El helicóptero necesita señal de confirmación en código Morse.",
-                "Envía el código SOS para solicitar el rescate.",
-                "Comando: echo helicopter ...---..."
+                "JEEP> Ya estás en el helipuerto. ¡Rápido llama al helicóptero!"
             ]
         },
         terminalHistory: null,
@@ -532,7 +530,7 @@ window.onload = function() {
     // Mostrar mensaje de bienvenida
     setTimeout(() => {
         addTerminalLine("Para jugar con Escapp, usa los comandos:", "system");
-        addTerminalLine("  email <email> - Establecer usuario", "system");
+        addTerminalLine("  email <email> - Establecer email", "system");
         addTerminalLine("  password <contraseña> - Establecer contraseña", "system");
         addTerminalLine("  start game - Iniciar conexión con Escapp", "system");
         addTerminalLine("  escapp logout - Desconectar de escapp", "system");
@@ -542,7 +540,7 @@ window.onload = function() {
 // ========== FUNCIONES ESCAPP ==========
 function escappConnect() {
     if (!ESCAPP_CONFIG.userEmail || !ESCAPP_CONFIG.userPassword) {
-        addTerminalLine("SYSTEM> Debes configurar user y password primero", "error");
+        addTerminalLine("SYSTEM> Debes configurar email y password primero", "error");
         return false;
     }
     
@@ -572,7 +570,7 @@ function escappConnect() {
         ESCAPP_CONFIG.socket.on('INITIAL_INFO', (data) => {
             if (data.participation === 'PARTICIPANT') {
                 const progress = data.erState?.progress || 0;
-                addTerminalLine(`Progreso escapp: ${progress}%`, "system");
+                //addTerminalLine(`SYSTEM> Progreso escapp: ${progress}%`, "system");
                 
                 // Sincronizar puzzles ya completados
                 if (data.erState?.puzzlesSolved) {
@@ -591,7 +589,7 @@ function escappConnect() {
         });
 
         ESCAPP_CONFIG.socket.on('MESSAGE', (data) => {
-            addTerminalLine(`MENSAJE> ${data.msg}`, "system");
+            addTerminalLine(`MENSAJE DEL PROFESOR> ${data.msg}`, "system");
         });
 
         ESCAPP_CONFIG.socket.on('connect_error', (error) => {
@@ -617,7 +615,7 @@ function escappDisconnect() {
         ESCAPP_CONFIG.socket = null;
     }
     ESCAPP_CONFIG.isConnected = false;
-    addTerminalLine("Desconectado de escapp.es", "system");
+    addTerminalLine("SYSTEM> Te has desconectado de Escapp", "system");
 }
 
 function sendPuzzleSolution(puzzleOrder, solution) {
@@ -645,8 +643,8 @@ function requestHint(puzzleOrder) {
     
     ESCAPP_CONFIG.socket.emit('REQUEST_HINT', {
         status: 'in_progress',
-        score: 50,
-        category: 'puzzle_' + puzzleNumber
+        score: 100,
+        category: null
     });
 }
 
@@ -949,7 +947,7 @@ function systemCodeCheck() {
         const buttons = document.querySelectorAll('.system-code-btn');
         buttons.forEach(btn => { btn.disabled = true; });
 
-        // Enviar solución a escapp
+        // ESCAPP--
         sendPuzzleSolution(1, gameState.challenges.access.answer.code);
         
         // Actualiza la pestaña system después de X tiempo
@@ -1079,7 +1077,7 @@ function systemElectricityCheck() {
             checkButton.classList.add('correct');
         }
         
-        // Enviar solución a escapp
+        // ESCAPP--
         const solution = `${code}-${params}`;
         sendPuzzleSolution(2, solution);
         
@@ -1169,8 +1167,7 @@ function systemSecurityCheck() {
             checkButton.classList.add('correct');
         }
 
-        // Enviar solución a escapp
-        sendPuzzleSolution(3, answer);
+        sendPuzzleSolution(3, answer);          // ESCAPP--
         
     } else {
         if (checkButton) {
@@ -1264,9 +1261,8 @@ function systemBridgeCheck() {
             checkButton.classList.add('correct');
         }
         
-        // Enviar solución a escapp
-        const solution = answerArray.join(',');
-        sendPuzzleSolution(4, solution);
+        // ESCAPP-
+        sendPuzzleSolution(4, "reto4completado");
         
     } else {
         if (checkButton) {
@@ -1317,11 +1313,11 @@ function processUserCommand(command) {
     const email = command.substring(5).trim();
     
     if (!email || !email.includes('@')) {
-        return `<div class="terminal-line error">Formato de email inválido. Ejemplo: user jugador@email.com</div>`;
+        return `<div class="terminal-line error">Formato de email inválido.</div>`;
     }
     
     ESCAPP_CONFIG.userEmail = email;
-    return `<div class="terminal-line success">Usuario establecido: ${email}</div>`;
+    return `<div class="terminal-line success">SYSTEM> Email establecido: ${email}</div>`;
 }
 
 // Procesar comando password
@@ -1333,7 +1329,7 @@ function processPasswordCommand(command) {
     }
     
     ESCAPP_CONFIG.userPassword = password;
-    return `<div class="terminal-line success">Contraseña establecida</div>`;
+    return `<div class="terminal-line success">SYSTEM> Contraseña establecida.</div>`;
 }
 
 // Procesar comandos escapp
@@ -1347,9 +1343,9 @@ function processEscappCommand(command) {
     
     switch(subCommand) {
         case 'status':
-            let statusText = `Estado escapp: ${ESCAPP_CONFIG.isConnected ? 'CONECTADO' : 'DESCONECTADO'}<br>`;
-            statusText += `Usuario: ${ESCAPP_CONFIG.userEmail || 'No configurado'}<br>`;
-            statusText += `Puzzles resueltos: ${ESCAPP_CONFIG.puzzlesSolved.join(', ') || 'Ninguno'}`;
+            let statusText = `Estado escapp: ${ESCAPP_CONFIG.isConnected ? 'Conectado' : 'Desconectado'}<br>`;
+            statusText += `Email: ${ESCAPP_CONFIG.userEmail || 'No configurado'}<br>`;
+            statusText += `Contraseña: ${ESCAPP_CONFIG.userPassword || 'No configurada'}<br>`;
             return `<div class="terminal-line">${statusText}</div>`;
             
         case 'hint':
@@ -1384,7 +1380,7 @@ function processCommand(command) {
     
     if (command.startsWith('echo helicopter')) {
         response = processHelicopterCommand(command);
-    } else if (command.startsWith('user ')) {
+    } else if (command.startsWith('email ')) {
         response = processUserCommand(command);
     } else if (command.startsWith('password ')) {
         response = processPasswordCommand(command);
@@ -1403,7 +1399,7 @@ function processCommand(command) {
 - <strong>clear</strong>                     Limpiar el terminal
 
 <strong>COMANDOS ESCAPP:</strong>
-  <strong>user &lt;email&gt;</strong>            Establecer usuario escapp
+  <strong>email &lt;email&gt;</strong>            Establecer usuario escapp
   <strong>password &lt;contraseña&gt;</strong>  Establecer contraseña escapp
   <strong>start game</strong>                 Iniciar conexión con escapp
   <strong>escapp status</strong>              Ver estado de conexión
@@ -1415,7 +1411,7 @@ function processCommand(command) {
                 if (escappConnect()) {
                     response = `<div class="terminal-line success">Iniciando juego en escapp...</div>`;
                 } else {
-                    response = `<div class="terminal-line error">Error al iniciar juego. Configura user y password primero.</div>`;
+                    response = `<div class="terminal-line error">Error al iniciar juego. Configura email y password primero.</div>`;
                 }
                 break;
                 
@@ -1541,8 +1537,7 @@ function processHelicopterCommand(command) {
                     terminalInput.placeholder = "¡Helicóptero llamado!";
                 }
                 
-                // Enviar solución a escapp
-                sendPuzzleSolution(5, morsePart);
+                sendPuzzleSolution(5, morsePart);   // ESCAPP--
                 
                 setTimeout(() => {
                     alert('¡RESCATE CONFIRMADO! El helicóptero está en camino. ¡Has salvado al equipo!');
@@ -1551,7 +1546,7 @@ function processHelicopterCommand(command) {
                 response = `<div class="terminal-line error">Código morse incorrecto.</div>`;
             }
         } else {
-            response = `<div class="terminal-line error">Código morse incorrecto. Usa: echo helicopter ...---...</div>`;
+            response = `<div class="terminal-line error">Código morse incorrecto.</div>`;
         }
     } else if (command === 'echo helicopter') {
         // Caso 2: Solo "echo helicopter" sin argumentos

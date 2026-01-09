@@ -303,7 +303,7 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong, ul, li, b, div {
     background-color: #ddd;
     border: 1px solid #ccc;
     margin: 20px 0;
-    border-radius: 4px;
+    border-radius: 2px;
     overflow: hidden;
 }
 
@@ -312,7 +312,7 @@ p, h1, h2, h3, h4, h5, h6, span, i, strong, ul, li, b, div {
 }
 
 .morse-row.header .morse-cell {
-    background-color: #2c3e50;
+    background-color: #494c4f;
     color: white;
     font-weight: bold;
     padding: 12px;
