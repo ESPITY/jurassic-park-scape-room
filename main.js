@@ -563,8 +563,10 @@ function escappConnect() {
             ESCAPP_CONFIG.isConnected = true;
             addTerminalLine("SYSTEM> Te has conectado a Escapp", "success");
             
-            ESCAPP_CONFIG.socket.emit('START_PLAYING');
-            startTimer(60 * 60);
+            // Enviar evento de inicio
+            setTimeout(() => {
+                ESCAPP_CONFIG.socket.emit('START_PLAYING');
+            }, 1000);
         });
 
         ESCAPP_CONFIG.socket.on('INITIAL_INFO', (data) => {
