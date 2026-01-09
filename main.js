@@ -13,10 +13,10 @@ const ESCAPP_CONFIG = {
 // ========== GLOBAL DEL JUEGO ==========
 const gameState = {
     challenges: {
-        access: { completed: true, solution: {code: "6015"}, answer: {code: ''}},
-        electricity: { completed: true, solution: {code: "333-L", param:"223"} },
-        security: { completed: true, solution: {code: "5427"}, answer: {code: ''} },
-        bridge: { completed: true, solution: { code:['00', '11', '22', '33', '44', '04', '13', '31', '40']}, answer: {code: []}},
+        access: { completed: false, solution: {code: "6015"}, answer: {code: ''}},
+        electricity: { completed: false, solution: {code: "333-L", param:"223"} },
+        security: { completed: false, solution: {code: "5427"}, answer: {code: ''} },
+        bridge: { completed: false, solution: { code:['00', '11', '22', '33', '44', '04', '13', '31', '40']}, answer: {code: []}},
         helicopter: { completed: false, solution: {code: "...---..."}, answer: { code: '' } }
     },
     documents: [
