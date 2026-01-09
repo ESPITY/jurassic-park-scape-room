@@ -13,11 +13,11 @@ const ESCAPP_CONFIG = {
 // ========== GLOBAL DEL JUEGO ==========
 const gameState = {
     challenges: {
-        access: { status: 'locked', completed: false, solution: {code: "6015"}, answer: {code: ''}},
-        electricity: { status: 'locked', completed: false, solution: {code: "333-L", param:"223"} },
-        security: { status: 'locked', completed: false, solution: {code: "5427"}, answer: {code: ''} },
-        bridge: { status: 'locked', completed: false, solution: { code:['00', '11', '22', '33', '44', '04', '13', '31', '40']}, answer: {code: []}},
-        helicopter: { status: 'locked', completed: false, solution: {code: "...---..."}, answer: { code: '' } }
+        access: { completed: false, solution: {code: "6015"}, answer: {code: ''}},
+        electricity: { completed: false, solution: {code: "333-L", param:"223"} },
+        security: { completed: false, solution: {code: "5427"}, answer: {code: ''} },
+        bridge: { completed: false, solution: { code:['00', '11', '22', '33', '44', '04', '13', '31', '40']}, answer: {code: []}},
+        helicopter: { completed: false, solution: {code: "...---..."}, answer: { code: '' } }
     },
     documents: [
         { id: 1, title: "Protocolo de emergencia y evacuación", show: true, read: false,
@@ -316,8 +316,8 @@ const tabContents = {
                 <div id="terminal-output" class="terminal-output">
                     <div class="terminal-line">Jurassic Park, Sistema de Comunicaciones v4.0.5</div>
                     <div class="terminal-line">Escriba "help" para ver los comandos disponibles.</div>
-                    <div class="terminal-line error">SYSTEM > ¡TODOS LOS SISTEMAS CAÍDOS!</div>
-                    <div class="terminal-line error">SYSTEM > Ruta del Jeep detenida.</div>
+                    <div class="terminal-line error">SYSTEM> HAN CAÍDO TODOS LOS SISTEMAS!</div>
+                    <div class="terminal-line error">SYSTEM> Ruta del Jeep detenida.</div>
                     <div class="terminal-line prompt">> </div>
                 </div>
                 <div class="terminal-input">
@@ -529,11 +529,13 @@ window.onload = function() {
     
     // Mostrar mensaje de bienvenida
     setTimeout(() => {
-        addTerminalLine("Para jugar con Escapp, usa los comandos:", "system");
-        addTerminalLine("  email <email> - Establecer email", "system");
-        addTerminalLine("  password <contraseña> - Establecer contraseña", "system");
-        addTerminalLine("  start game - Iniciar conexión con Escapp", "system");
-        addTerminalLine("  escapp logout - Desconectar de escapp", "system");
+        addTerminalLine("Para jugar con Escapp, usa los comandos:", "hint");
+        addTerminalLine("email [email] -> Establecer email Escapp", "system");
+        addTerminalLine("password [contraseña] -> Establecer contraseña", "system");
+        addTerminalLine("start game -> Iniciar conexión con Escapp", "system");
+        addTerminalLine("help escapp -> Lista de comandos de Escapp", "system");
+
+
     }, 1000);
 };
 
@@ -561,10 +563,8 @@ function escappConnect() {
             ESCAPP_CONFIG.isConnected = true;
             addTerminalLine("SYSTEM> Te has conectado a Escapp", "success");
             
-            // Enviar evento de inicio
-            setTimeout(() => {
-                ESCAPP_CONFIG.socket.emit('START_PLAYING');
-            }, 1000);
+            ESCAPP_CONFIG.socket.emit('START_PLAYING');
+            startTimer(60 * 60);
         });
 
         ESCAPP_CONFIG.socket.on('INITIAL_INFO', (data) => {
@@ -585,6 +585,9 @@ function escappConnect() {
         });
 
         ESCAPP_CONFIG.socket.on('HINT_RESPONSE', (data) => {
+            if (ESCAPP_CONFIG.hintCounters[puzzleNum] >= 3) {
+                addTerminalLine("SYSTEM> Has usado todas las pistas para este reto", "system");
+            }
             addTerminalLine(`PISTA> ${data.msg}`, "hint");
         });
 
@@ -629,22 +632,16 @@ function sendPuzzleSolution(puzzleOrder, solution) {
     });
 }
 
-function requestHint(puzzleOrder) {
+function requestHint() {
     if (!ESCAPP_CONFIG.isConnected || !ESCAPP_CONFIG.socket) {
-        addTerminalLine("SYSTEM> No estás conectado a escapp. Usa 'start game' primero.", "error");
-        return;
-    }
-    
-    const puzzleNumber = parseInt(puzzleOrder);
-    if (isNaN(puzzleNumber) || puzzleNumber < 1 || puzzleNumber > 5) {
-        addTerminalLine("SYSTEM>  Número de puzzle inválido (1-5)", "error");
+        addTerminalLine("SYSTEM> No estás conectado a Escapp.", "error");
         return;
     }
     
     ESCAPP_CONFIG.socket.emit('REQUEST_HINT', {
-        status: 'in_progress',
+        status: 'completed',
         score: 100,
-        category: null
+        category: undefined
     });
 }
 
@@ -693,6 +690,8 @@ function syncEscappPuzzles() {
 function addTerminalLine(text, type = "normal") {
     const output = document.getElementById('terminal-output');
     if (!output) return;
+
+    removeEndEmptyPrompt(output);
     
     let className = "terminal-line";
     switch(type) {
@@ -1349,11 +1348,8 @@ function processEscappCommand(command) {
             return `<div class="terminal-line">${statusText}</div>`;
             
         case 'hint':
-            if (parts.length < 3) {
-                return `<div class="terminal-line error">Debes especificar número de puzzle (1-5)</div>`;
-            }
-            requestHint(parts[2]);
-            return `<div class="terminal-line">Solicitando pista para puzzle ${parts[2]}...</div>`;
+            requestHint();
+            return `<div class="terminal-line">Solicitando pista...</div>`;
             
         case 'logout':
             escappDisconnect();
@@ -1388,23 +1384,27 @@ function processCommand(command) {
         response = processEscappCommand(command);
     } else {
         switch(command.toLowerCase()) {
+            //   <strong>jeep hint</strong>                   Pedir una pista (local) a la gente del Jeep 
             case 'help':
                 response = `<div class="terminal-line" style="white-space: pre">
-- <strong>echo [receptor]</strong>           Enviar un mensaje
-  <strong>jeep status</strong>                 Estado actual del Jeep
-  <strong>jeep explore</strong>                La gente del Jeep examina el área
-  <strong>jeep hint</strong>                   Pedir una pista a la gente del Jeep
-  <strong>helicopter [codigo]</strong>         Comunicarse con rescate aéreo
-- <strong>cd sector</strong>                 El Jeep avanza al siguiente sector
-- <strong>clear</strong>                     Limpiar el terminal
+  <strong>echo [receptor]</strong>             Enviar un mensaje
+    <strong>jeep status</strong>                 Estado actual del Jeep
+    <strong>jeep explore</strong>                La gente del Jeep examina el área
+    <strong>helicopter [morse]</strong>         Comunicarse con rescate aéreo
+  <strong>cd sector</strong>                   El Jeep avanza al siguiente sector
+  <strong>clear</strong>                       Limpiar el terminal
+  <strong>help escapp</strong>                 Ayuda de Escapp</div>`;
+                break;
 
-<strong>COMANDOS ESCAPP:</strong>
-  <strong>email &lt;email&gt;</strong>            Establecer usuario escapp
-  <strong>password &lt;contraseña&gt;</strong>  Establecer contraseña escapp
-  <strong>start game</strong>                 Iniciar conexión con escapp
-  <strong>escapp status</strong>              Ver estado de conexión
-  <strong>escapp hint &lt;número&gt;</strong>   Solicitar pista (1-5)
-  <strong>escapp logout</strong>              Desconectar de escapp</div>`;
+            //   <strong>escapp hint</strong>               Solicitar pista Escapp (online)
+            case 'help escapp':
+                response = `<div class="terminal-line" style="white-space: pre">
+  <strong>email [email]</strong>             Establecer email Escapp
+  <strong>password [contraseña]</strong>     Establecer contraseña Escapp
+  <strong>start game</strong>                Iniciar conexión con escapp
+  <strong>escapp status</strong>             Ver estado de conexión Escapp
+  <strong>escapp hint</strong>               Solicitar pista Escapp (online)
+  <strong>escapp logout</strong>             Desconectar de Escapp</div>`;
                 break;
                 
             case 'start game':
@@ -1423,18 +1423,20 @@ function processCommand(command) {
                 response = getJeepResponse(sector, 'explore');
                 break;
             
-            case 'echo jeep hint':
-                // Pistas adicionales según retos completados
-                if (sector === 1 && !gameState.challenges.electricity.completed) {
-                    response += `<div class="terminal-line hint">Pista: Consulta el "Manual de sistemas" en Documentos para los parámetros del código 333-L</div>`;
-                }
-                if (sector === 2 && !gameState.challenges.security.completed) {
-                    response += `<div class="terminal-line hint">Pista: Cada sector necesita su voltaje específico. Consulta la guía paleontológica.</div>`;
-                }
-                if (sector === 3) {
-                    response += `<div class="terminal-line hint">Pista: El patrón en el suelo muestra coordenadas: 00, 11, 22, 33, 44...</div>`;
-                }
-                break;
+            // case 'echo jeep hint':
+            //     // Pistas LOCALES según retos completados
+            //     if (!gameState.challenges.access.completed) {
+            //         response += `<div class="terminal-line hint">PISTA> Revisa los documentos. Piensa como se suman kilogramos y toneladas.</div>`;
+            //     } else if (!gameState.challenges.electricity.completed) {
+            //         response += `<div class="terminal-line hint">PISTA> Comunícale al Jeep que explore el terreno con el comando "echo jeep explore" y revisa los documentos.</div>`;
+            //     } else if (!gameState.challenges.security.completed) {
+            //         response += `<div class="terminal-line hint">PISTA> Revisa los documentos.</div>`;
+            //     } else if (!gameState.challenges.bridge.completed) {
+            //         response += `<div class="terminal-line hint">PISTA> Comprueba lo que dice el Jeep en el terminal.</div>`;
+            //     } else if (!gameState.challenges.helicopter.completed) {
+            //         response += `<div class="terminal-line hint">PISTA> Mueve el Jeep al helipuerto (cd Sector) y llama al helicóptero con el comando "echo helicopter {codigo]".</div>`;
+            //     }
+            //     break;
                 
             case 'cd sector':
                 if (sector < jeep.route.length - 1) {
