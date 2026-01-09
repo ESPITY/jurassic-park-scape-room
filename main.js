@@ -587,9 +587,6 @@ function escappConnect() {
         });
 
         ESCAPP_CONFIG.socket.on('HINT_RESPONSE', (data) => {
-            if (ESCAPP_CONFIG.hintCounters[puzzleNum] >= 3) {
-                addTerminalLine("SYSTEM> Has usado todas las pistas para este reto", "system");
-            }
             addTerminalLine(`PISTA> ${data.msg}`, "hint");
         });
 
