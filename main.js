@@ -13,10 +13,10 @@ const ESCAPP_CONFIG = {
 // ========== GLOBAL DEL JUEGO ==========
 const gameState = {
     challenges: {
-        access: { completed: false, solution: {code: "6015"}, answer: {code: ''}},
-        electricity: { completed: false, solution: {code: "333-L", param:"223"} },
-        security: { completed: false, solution: {code: "5427"}, answer: {code: ''} },
-        bridge: { completed: false, solution: { code:['00', '11', '22', '33', '44', '04', '13', '31', '40']}, answer: {code: []}},
+        access: { completed: true, solution: {code: "6015"}, answer: {code: ''}},
+        electricity: { completed: true, solution: {code: "333-L", param:"223"} },
+        security: { completed: true, solution: {code: "5427"}, answer: {code: ''} },
+        bridge: { completed: true, solution: { code:['00', '11', '22', '33', '44', '04', '13', '31', '40']}, answer: {code: []}},
         helicopter: { completed: false, solution: {code: "...---..."}, answer: { code: '' } }
     },
     documents: [
@@ -264,8 +264,8 @@ const gameState = {
             { id: 0, name: "Sector 0 - Indefinido", image: "map-visual-0.png", completed: true },
             { id: 1, name: "Sector 1 - Central Eléctrica", image: "map-visual-1.png", completed: false },
             { id: 2, name: "Sector 2 - Centro de Seguridad", image: "map-visual-2.png", completed: false },
-            { id: 4, name: "Sector 3 - Puente", image: "map-visual-4.png", completed: false },
-            { id: 5, name: "Sector 4 - Helipuerto", image: "jeep-map-visual-5.png", completed: false }
+            { id: 3, name: "Sector 3 - Puente", image: "map-visual-3.png", completed: false },
+            { id: 4, name: "Sector 4 - Helipuerto", image: "jeep-map-visual-4.png", completed: false },
         ],
         messages: {
             status: [
@@ -1529,6 +1529,8 @@ function processHelicopterCommand(command) {
             if (morsePart === gameState.challenges.helicopter.solution.code) {
                 gameState.challenges.helicopter.completed = true;
                 
+                showCommunicationVisual();
+
                 response = `<div class="terminal-line success">El helicóptero ha recibido tu llamada y está en camino.
                 ¡Has rescatado a la gente del Jeep!</div>`;
 
@@ -1566,9 +1568,10 @@ function showCommunicationVisual() {
     const jeepImg = document.querySelector('#visual-comms img');
     const sector = gameState.currentSector;
 
-    if (jeepImg) {
-        jeepImg.src = `images/map-visual-${sector}.png`;
-    }
+    if (!jeepImg) return;
+
+    if (gameState.challenges.helicopter.completed) jeepImg.src = `images/map-visual-5.png`;
+    else jeepImg.src = `images/map-visual-${sector}.png`;
 }
 
 // TERMINAL: desplazar al final
